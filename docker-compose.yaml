@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  streamlit-app:
+    build: .
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app  # Mount the current directory to the container for live code updates
+    environment:
+      - STREAMLIT_HOME=/app
+    command: streamlit run Layout.py --server.port=8501 --server.address=0.0.0.0
