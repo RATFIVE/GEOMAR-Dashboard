@@ -2,3 +2,5 @@ pandas
 numpy
 streamlit
 plotly
+folium
+streamlit-folium

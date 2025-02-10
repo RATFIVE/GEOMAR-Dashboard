@@ -1,8 +1,9 @@
-# %%
+
 import requests
 import json
 import pandas as pd
 import numpy as np
+
 # import plotly.express as px
 # import plotly.graph_objects as go
 
@@ -26,6 +27,12 @@ class FrostServer:
         content = self.get_content(self.url + self.thing)
         datastream_url = content['Datastreams@iot.navigationLink']
         return datastream_url
+    
+    def get_position_url(self):
+        content = self.get_content(self.url + self.thing)
+        position_url = content['Locations@iot.navigationLink']
+        return position_url
+    
 
     def get_observations_url(self):
         datastream_url = self.get_datastream_url()

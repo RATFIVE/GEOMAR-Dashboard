@@ -2,6 +2,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 from frost_server import FrostServer
+import folium
+import json
 
 # # Initialize the FrostServer class
 # server = FrostServer()
@@ -19,6 +21,7 @@ from frost_server import FrostServer
 # df_obs["result"] = df_obs["result"].astype(float)
 
 #print(df_obs.head(3))
+
 
 
 def make_line_plot(data:pd.DataFrame):
@@ -74,3 +77,56 @@ def make_line_plot2(data:pd.DataFrame):
         )
     )
 
+
+def make_map(data):
+
+
+    # Your JSON data
+    # data = {
+    #     "value": [
+    #         {
+    #             "@iot.selfLink": "https://timeseries.geomar.de/soop/FROST-Server/v1.1/Locations(1)",
+    #             "@iot.id": 1,
+    #             "name": "Position lat 54.3323, lon 10.1519",
+    #             "description": "Measuring point",
+    #             "encodingType": "application/geo+json",
+    #             "location": {
+    #                 "type": "Point",
+    #                 "coordinates": [10.1519, 54.3323]  # [longitude, latitude]
+    #             },
+    #             "HistoricalLocations@iot.navigationLink": "https://timeseries.geomar.de/soop/FROST-Server/v1.1/Locations(1)/HistoricalLocations",
+    #             "Things@iot.navigationLink": "https://timeseries.geomar.de/soop/FROST-Server/v1.1/Locations(1)/Things"
+    #         }
+    #     ]
+    # }
+    #print('Data:')
+    #print(data)
+    # Extract coordinates
+    coordinates = data["value"][0]["location"]["coordinates"]
+    longitude, latitude = coordinates[0], coordinates[1]
+    print(longitude, latitude)
+
+    # Initialize a map centered around the coordinates
+    m = folium.Map(
+        #location=[54.3323, 10.1519],
+        location=[latitude, longitude], 
+        zoom_start=12)
+
+    # Add a marker
+    folium.Marker(
+        [latitude, longitude],
+        popup=f"Reventolou Brücke\nCurrent Temperature: ",
+        tooltip="Click for info"
+    ).add_to(m)
+
+    return m
+
+    # Display the map in a Jupyter Notebook (optional)
+    #m  # Uncomment this if you're using Jupyter
+
+    # Save the map as an HTML file
+    #m.save("interactive_map.html")
+
+    #print("Map saved as interactive_map.html")
+
+#make_map()
