@@ -89,7 +89,7 @@ class StreamlitApp:
                     marina_name = marina['name']
                     marina_latitude = marina['location']['latitude']
                     marina_longitude = marina['location']['longitude']
-                    marina_radius = 0.05
+                    marina_radius = 0.1
 
                     # st.write(f"Marina: {marina_name}")
                     # st.write(f"Latitude: {marina_latitude}")
@@ -105,18 +105,24 @@ class StreamlitApp:
                     one_week_before = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 60*60*24*7))
                     output_filename = 'subset_output.nc'
 
+                    # so: Sea water salinityso [/ 103]
+                    # thetao: Sea water potential temperaturethetao [°C]
+                    # vo: Northward sea water velocityvo [m/s]
+                    # zos: Sea surface height above geoidzos [m]
+                    # uo: Eastward sea water velocityuo [m/s]
+
                     self.marina_data = ac.get_subset(
-                            dataset_id="cmems_mod_bal_phy_anfc_PT1H-i",
-                        dataset_version="202411",
-                        variables=["thetao", "sla"],
+                            dataset_id="cmems_mod_glo_phy_anfc_0.083deg_PT1H-m",
+                        dataset_version="202406",
+                        variables=["so", "thetao", "vo", "zos", "uo"], 
                         minimum_longitude=minimum_longitude,
                         maximum_longitude=maximum_longitude,
                         minimum_latitude=minimum_latitude,
                         maximum_latitude=maximum_latitude,
                         start_datetime=one_week_before,
                         end_datetime=today,
-                        minimum_depth=0.5016462206840515,
-                        maximum_depth=0.5016462206840515,
+                        minimum_depth=0.49402499198913574,
+                        maximum_depth=0.49402499198913574,
                         coordinates_selection_method="strict-inside",
                         disable_progress_bar=False,
                         output_filename=output_filename
@@ -126,24 +132,75 @@ class StreamlitApp:
                     marina_df = marina_df.dropna(axis=0, how='any')
                     marina_df_grouped = marina_df.groupby('time').mean().reset_index()
                     marina_df_grouped.sort_values(by='time', ascending=False, inplace=True)
+
+                    def round_data(data, digits=5):
+                        data = round(float(data), digits)
+                        return data
                     
                     # get current temperature
-                    current_temp = marina_df_grouped['thetao'].iloc[0]
+                    current_thetao = round_data(marina_df_grouped['thetao'].iloc[0])
+                    current_so = round_data(marina_df_grouped['so'].iloc[0])
+                    current_uo = round_data(marina_df_grouped['uo'].iloc[0])
+                    current_vo = round_data(marina_df_grouped['vo'].iloc[0])
+                    current_zos = round_data(marina_df_grouped['zos'].iloc[0])
+
                     current_time = marina_df_grouped['time'].iloc[0]
 
                     ac.delete_dataset(output_filename)
 
                     break
 
+
+
+        def boxed_text(text, value):
+            with st.container():
+                st.markdown(
+                    f"""
+                    <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+                        {text}:
+                    </div>
+                    <div style="display: flex; justify-content: center;">
+                        <pre style="
+                            background-color: #f0f0f0;
+                            padding: 10px;
+                            border-radius: 5px;
+                            border: 1px solid #ddd;
+                            text-align: left;
+                            width: fit-content;
+                            max-width: 80%;
+                            white-space: pre-wrap;
+                            word-wrap: break-word;
+                        ">
+                    {value}
+                        </pre>
+                    </div>
+                    """,
+                    unsafe_allow_html=True
+                )
+
+        
         col1, col2 = st.columns(2)
         with col1:
-            st.button(f'Aktuelle Zeit: \n{current_time}')
+            boxed_text('Aktuelle Zeit', current_time)
+            st.divider()
+            boxed_text('Wassertemperatur [°C]', current_thetao)
+            st.divider()
+            boxed_text('Salinität [/10³]', current_so)
+                
             
         with col2:
-            current_temp = round(float(current_temp), 2)            
-            st.button(f'Wassertemperatur: \n{current_temp}°C')
+            boxed_text('Nördliche Wassergeschwindigkeit [m/s]', current_vo)
+            st.divider()
+            boxed_text('Östliche Wassergeschwindigkeit [m/s]', current_uo)
+            st.divider()
+            boxed_text('Seeoberflächenhöhe [m]', current_zos)
+                       
             
-
+            
+        
+        
+        
+        
 
     
 
