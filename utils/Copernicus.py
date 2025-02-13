@@ -51,4 +51,8 @@ class AdvancedCopernicus:
     
     def delete_dataset(self, file_name):
         os.remove(file_name)
+        #delete all file with .nc extension
+        for file in os.listdir():
+            if file.endswith(".nc"):
+                os.remove(file)
         
