@@ -15,8 +15,9 @@
     {
         "name": "Port de Locudy",
         "location": {
-            "latitude": 47.847,
-            "longitude": -4.366
+            "latitude": 47.00,
+            "longitude": -4.414
+
         },
         "address": {
             "street": "Port de Locudy",
@@ -62,6 +63,19 @@
             "street": "Am Stettiner Haff 1",
             "zip": "17373",
             "city": "Ueckermünde",
+            "country": "Germany"
+        }
+    },
+    {
+        "name": "Badesteg Reventlou",
+        "location": {
+            "latitude": 54.3323,
+            "longitude": 10.1519
+        },
+        "address": {
+            "street": "Reventloubrücke",
+            "zip": "24103",
+            "city": "Kiel",
             "country": "Germany"
         }
     }
