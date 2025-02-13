@@ -67,6 +67,11 @@ class StreamlitApp:
 
     def section2(self):
 
+        today = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        one_week_before = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 60*60*24*7))
+        output_filename = 'subset_output.nc'
+
+
         if self.selected_marina == 'Badesteg Reventlou':
             position_data = self.get_position_data()
             coordinates = position_data["value"][0]["location"]["coordinates"]
@@ -74,6 +79,57 @@ class StreamlitApp:
 
             current_temp, current_time = self.get_current_temperature_and_time()
             current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+
+            radius = 0.1
+
+            minimum_longitude = longitude - radius
+            maximum_longitude = longitude + radius
+
+            minimum_latitude = latitude - radius
+            maximum_latitude = latitude + radius
+
+
+
+            self.marina_data = ac.get_subset(
+                dataset_id="cmems_mod_glo_phy_anfc_0.083deg_PT1H-m",
+                dataset_version="202406",
+                variables=["so", "thetao", "vo", "zos", "uo"], 
+                minimum_longitude=minimum_longitude,
+                maximum_longitude=maximum_longitude,
+                minimum_latitude=minimum_latitude,
+                maximum_latitude=maximum_latitude,
+                start_datetime=one_week_before,
+                end_datetime=today,
+                minimum_depth=0.49402499198913574,
+                maximum_depth=0.49402499198913574,
+                coordinates_selection_method="strict-inside",
+                disable_progress_bar=False,
+                output_filename=output_filename
+                )
+            ac.delete_dataset(output_filename)
+
+            marina_df = self.marina_data.to_dataframe().reset_index()
+            marina_df = marina_df.dropna(axis=0, how='any')
+            marina_df_grouped = marina_df.groupby('time').mean().reset_index()
+            marina_df_grouped.sort_values(by='time', ascending=False, inplace=True)
+
+            def round_data(data, digits=5):
+                data = round(float(data), digits)
+                return data
+            
+            # get current temperature
+            current_thetao = round_data(marina_df_grouped['thetao'].iloc[0])
+            current_so = round_data(marina_df_grouped['so'].iloc[0])
+            current_uo = round_data(marina_df_grouped['uo'].iloc[0])
+            current_vo = round_data(marina_df_grouped['vo'].iloc[0])
+            current_zos = round_data(marina_df_grouped['zos'].iloc[0])
+
+            current_time = marina_df_grouped['time'].iloc[0]
+
+
+
+
+
         else:
             # get position data of selected marina
             for marina in self.marinas:
@@ -101,9 +157,7 @@ class StreamlitApp:
                     minimum_latitude = marina_latitude - marina_radius
                     maximum_latitude = marina_latitude + marina_radius
 
-                    today = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-                    one_week_before = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 60*60*24*7))
-                    output_filename = 'subset_output.nc'
+                   
 
                     # so: Sea water salinityso [/ 103]
                     # thetao: Sea water potential temperaturethetao [°C]
@@ -127,13 +181,14 @@ class StreamlitApp:
                         disable_progress_bar=False,
                         output_filename=output_filename
                         )
-                    
+                    ac.delete_dataset(output_filename)
+
                     marina_df = self.marina_data.to_dataframe().reset_index()
                     marina_df = marina_df.dropna(axis=0, how='any')
                     marina_df_grouped = marina_df.groupby('time').mean().reset_index()
                     marina_df_grouped.sort_values(by='time', ascending=False, inplace=True)
 
-                    def round_data(data, digits=5):
+                    def round_data(data, digits=3):
                         data = round(float(data), digits)
                         return data
                     
@@ -146,7 +201,7 @@ class StreamlitApp:
 
                     current_time = marina_df_grouped['time'].iloc[0]
 
-                    ac.delete_dataset(output_filename)
+                    
 
                     break
 
@@ -193,7 +248,7 @@ class StreamlitApp:
             st.divider()
             boxed_text('Östliche Wassergeschwindigkeit [m/s]', current_uo)
             st.divider()
-            boxed_text('Seeoberflächenhöhe [m]', current_zos)
+            boxed_text('Wasseroberfläche über Geoid [m]', current_zos)
                        
             
             
@@ -236,16 +291,10 @@ class StreamlitApp:
             ))
 
 
-
-        # fig = make_line_plot(self.df_obs)
-
-        
-
-
         fig.update_layout(
-            title='Temperature Over Time',
-            xaxis_title='Time',
-            yaxis_title='Temperature',
+            title='Temperatur der letzten 7 Tage',
+            xaxis_title='Zeit',
+            yaxis_title='Temperatur [°C]',
             template='plotly_white',
             hovermode='x unified'
         )
@@ -332,7 +381,8 @@ class StreamlitApp:
         folium.Marker(
             [latitude, longitude],
             popup=f"{name} Pos: {latitude}, {longitude} \n Akteulle Temperatur: {current_temp}°C",
-            tooltip=f'{name}'
+            tooltip=f'{name}',
+            icon=folium.Icon(icon="info-sign", color="red")
         ).add_to(m)
 
         # Add coordinates of marinas
@@ -343,7 +393,8 @@ class StreamlitApp:
             folium.Marker(
                 [latitude, longitude],
                 popup=f"{name}",
-                tooltip=f"{name}"
+                tooltip=f"{name}",
+                icon=folium.Icon(icon="info-sign", color="red")
             ).add_to(m)
             
 
