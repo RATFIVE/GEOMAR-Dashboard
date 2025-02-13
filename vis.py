@@ -1,7 +1,7 @@
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-from frost_server import FrostServer
+from utils.frost_server import FrostServer
 import folium
 import json
 
@@ -104,7 +104,7 @@ def make_map(data):
     # Extract coordinates
     coordinates = data["value"][0]["location"]["coordinates"]
     longitude, latitude = coordinates[0], coordinates[1]
-    print(longitude, latitude)
+    #print(longitude, latitude)
 
     # Initialize a map centered around the coordinates
     m = folium.Map(
