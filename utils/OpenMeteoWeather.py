@@ -16,9 +16,12 @@ class OpenMeteoWeather:
         retry_session = retry(cache_session, retries=5, backoff_factor=0.2)
         self.openmeteo = openmeteo_requests.Client(session=retry_session)
 
-    def fetch_weather_data(self):
+    def fetch_weather_data(self, archive=False):
         # Define the URL and parameters
-        url = "https://api.open-meteo.com/v1/forecast"
+        if archive:
+            url="https://archive-api.open-meteo.com/v1/archive"
+        else:
+            url = "https://api.open-meteo.com/v1/forecast"
         params = {
             "latitude": self.latitude,
             "longitude": self.longitude,
@@ -76,9 +79,9 @@ class OpenMeteoWeather:
         hourly_dataframe = pd.DataFrame(data=hourly_data)
         return hourly_dataframe
 
-    def get_weather_dataframe(self):
+    def get_weather_dataframe(self, archive=False):
         # Fetch and process weather data
-        response = self.fetch_weather_data()
+        response = self.fetch_weather_data(archive=archive)
         return self.process_weather_data(response)
 
 
