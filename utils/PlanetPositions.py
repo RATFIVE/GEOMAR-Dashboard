@@ -7,7 +7,7 @@ class PlanetPositions:
     def __init__(self, start_date: str, stop_date: str, step: str = '1h'):
         self.planets = {
             "Mercury": 199, "Venus": 299, "Earth": 399, "Mars": 499,
-            "Jupiter": 599, "Saturn": 699, "Uranus": 799, "Neptune": 899
+            "Jupiter": 599, "Saturn": 699, "Uranus": 799, "Neptune": 899, "Moon": 301
         }
         self.epochs = {'start': start_date, 'stop': stop_date, 'step': step}
         self.df_all = None
@@ -16,7 +16,7 @@ class PlanetPositions:
         all_data = []
         
         for planet, planet_id in self.planets.items():
-            obj = Horizons(id=planet_id, location='500@sun', epochs=self.epochs)
+            obj = Horizons(id=planet_id, location='500@399', epochs=self.epochs)
             data = obj.vectors()
             df = data.to_pandas()
             df["planet"] = planet  # Planetenname hinzufügen
