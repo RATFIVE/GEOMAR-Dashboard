@@ -12,10 +12,11 @@ import time
 from streamlit_folium import st_folium
 import json
 import folium
-from utils.Copernicus import AdvancedCopernicus as ac
+from utils.Copernicus import AdvancedCopernicus
+from utils.OpenMeteoWeather import OpenMeteoWeather
 
 
-ac = ac() 
+ac = AdvancedCopernicus() 
 
 
 class StreamlitApp:
@@ -25,6 +26,7 @@ class StreamlitApp:
         self.df_obs = self.get_frost_observations()
         self.position_data = self.get_position_data()
         self.marinas = self.get_json_data('marinas.json')
+        self.preloaded_data = self.preload_data()
         
 
     def header(self):
@@ -68,189 +70,51 @@ class StreamlitApp:
 
 
     def section2(self):
+        pass
 
-        today = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-        one_week_before = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 60*60*24*7))
-        output_filename = 'subset_output.nc'
+        # def boxed_text(text, value):
 
-
-        if self.selected_marina == 'Badesteg Reventlou':
-            position_data = self.get_position_data()
-            coordinates = position_data["value"][0]["location"]["coordinates"]
-            longitude, latitude = coordinates[0], coordinates[1]
-
-            current_temp, current_time = self.get_current_temperature_and_time()
-            current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-
-            radius = 0.1
-
-            minimum_longitude = longitude - radius
-            maximum_longitude = longitude + radius
-
-            minimum_latitude = latitude - radius
-            maximum_latitude = latitude + radius
-
-
-
-            self.marina_data = ac.get_subset(
-                dataset_id="cmems_mod_glo_phy_anfc_0.083deg_PT1H-m",
-                dataset_version="202406",
-                variables=["so", "thetao", "vo", "zos", "uo"], 
-                minimum_longitude=minimum_longitude,
-                maximum_longitude=maximum_longitude,
-                minimum_latitude=minimum_latitude,
-                maximum_latitude=maximum_latitude,
-                start_datetime=one_week_before,
-                end_datetime=today,
-                minimum_depth=0.49402499198913574,
-                maximum_depth=0.49402499198913574,
-                coordinates_selection_method="strict-inside",
-                disable_progress_bar=False,
-                output_filename=output_filename
-                )
-            ac.delete_dataset(output_filename)
-
-            marina_df = self.marina_data.to_dataframe().reset_index()
-            marina_df = marina_df.dropna(axis=0, how='any')
-            marina_df_grouped = marina_df.groupby('time').mean().reset_index()
-            marina_df_grouped.sort_values(by='time', ascending=False, inplace=True)
-
-            def round_data(data, digits=5):
-                data = round(float(data), digits)
-                return data
-            
-            # get current temperature
-            current_thetao = round_data(marina_df_grouped['thetao'].iloc[0])
-            current_so = round_data(marina_df_grouped['so'].iloc[0])
-            current_uo = round_data(marina_df_grouped['uo'].iloc[0])
-            current_vo = round_data(marina_df_grouped['vo'].iloc[0])
-            current_zos = round_data(marina_df_grouped['zos'].iloc[0])
-
-            current_time = marina_df_grouped['time'].iloc[0]
-
-
-
-
-
-        else:
-            # get position data of selected marina
-            for marina in self.marinas:
-                if marina['name'] == self.selected_marina:
-
-                    # find name = Hafen Flensburg Sonwik in marinas.json
-                    def find_marina(name, marinas):
-                        return [marina for marina in marinas if marina['name'] == name][0]
-
-                    marina = find_marina(marina['name'], self.marinas)
-
-
-                    marina_name = marina['name']
-                    marina_latitude = marina['location']['latitude']
-                    marina_longitude = marina['location']['longitude']
-                    marina_radius = 0.1
-
-                    # st.write(f"Marina: {marina_name}")
-                    # st.write(f"Latitude: {marina_latitude}")
-                    # st.write(f"Longitude: {marina_longitude}")
-
-                    minimum_longitude = marina_longitude - marina_radius
-                    maximum_longitude = marina_longitude + marina_radius
-
-                    minimum_latitude = marina_latitude - marina_radius
-                    maximum_latitude = marina_latitude + marina_radius
-
-                   
-
-                    # so: Sea water salinityso [/ 103]
-                    # thetao: Sea water potential temperaturethetao [°C]
-                    # vo: Northward sea water velocityvo [m/s]
-                    # zos: Sea surface height above geoidzos [m]
-                    # uo: Eastward sea water velocityuo [m/s]
-
-                    self.marina_data = ac.get_subset(
-                            dataset_id="cmems_mod_glo_phy_anfc_0.083deg_PT1H-m",
-                        dataset_version="202406",
-                        variables=["so", "thetao", "vo", "zos", "uo"], 
-                        minimum_longitude=minimum_longitude,
-                        maximum_longitude=maximum_longitude,
-                        minimum_latitude=minimum_latitude,
-                        maximum_latitude=maximum_latitude,
-                        start_datetime=one_week_before,
-                        end_datetime=today,
-                        minimum_depth=0.49402499198913574,
-                        maximum_depth=0.49402499198913574,
-                        coordinates_selection_method="strict-inside",
-                        disable_progress_bar=False,
-                        output_filename=output_filename
-                        )
-                    ac.delete_dataset(output_filename)
-
-                    marina_df = self.marina_data.to_dataframe().reset_index()
-                    marina_df = marina_df.dropna(axis=0, how='any')
-                    marina_df_grouped = marina_df.groupby('time').mean().reset_index()
-                    marina_df_grouped.sort_values(by='time', ascending=False, inplace=True)
-
-                    def round_data(data, digits=3):
-                        data = round(float(data), digits)
-                        return data
-                    
-                    # get current temperature
-                    current_thetao = round_data(marina_df_grouped['thetao'].iloc[0])
-                    current_so = round_data(marina_df_grouped['so'].iloc[0])
-                    current_uo = round_data(marina_df_grouped['uo'].iloc[0])
-                    current_vo = round_data(marina_df_grouped['vo'].iloc[0])
-                    current_zos = round_data(marina_df_grouped['zos'].iloc[0])
-
-                    current_time = marina_df_grouped['time'].iloc[0]
-
-                    
-
-                    break
-
-
-
-        def boxed_text(text, value):
-            with st.container():
-                st.markdown(
-                    f"""
-                    <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
-                        {text}:
-                    </div>
-                    <div style="display: flex; justify-content: center;">
-                        <pre style="
-                            background-color: #f0f0f0;
-                            padding: 10px;
-                            border-radius: 5px;
-                            border: 1px solid #ddd;
-                            text-align: left;
-                            width: fit-content;
-                            max-width: 80%;
-                            white-space: pre-wrap;
-                            word-wrap: break-word;
-                        ">
-                    {value}
-                        </pre>
-                    </div>
-                    """,
-                    unsafe_allow_html=True
-                )
+        #     with st.container():
+        #         st.markdown(
+        #             f"""
+        #             <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+        #                 {text}:
+        #             </div>
+        #             <div style="display: flex; justify-content: center;">
+        #                 <pre style="
+        #                     background-color: #f0f0f0;
+        #                     padding: 10px;
+        #                     border-radius: 5px;
+        #                     border: 1px solid #ddd;
+        #                     text-align: left;
+        #                     width: fit-content;
+        #                     max-width: 80%;
+        #                     white-space: pre-wrap;
+        #                     word-wrap: break-word;
+        #                 ">
+        #             {value}
+        #                 </pre>
+        #             </div>
+        #             """,
+        #             unsafe_allow_html=True
+        #         )
 
         
-        col1, col2 = st.columns(2)
-        with col1:
-            boxed_text('Aktuelle Zeit', current_time)
-            st.divider()
-            boxed_text('Wassertemperatur [°C]', current_thetao)
-            st.divider()
-            boxed_text('Salinität [/10³]', current_so)
+        # col1, col2 = st.columns(2)
+        # with col1:
+        #     boxed_text('Aktuelle Zeit', current_time)
+        #     st.divider()
+        #     boxed_text('Wassertemperatur [°C]', current_thetao)
+        #     st.divider()
+        #     boxed_text('Salinität [/10³]', current_so)
                 
             
-        with col2:
-            boxed_text('Nördliche Wassergeschwindigkeit [m/s]', current_vo)
-            st.divider()
-            boxed_text('Östliche Wassergeschwindigkeit [m/s]', current_uo)
-            st.divider()
-            boxed_text('Wasseroberfläche über Geoid [m]', current_zos)
+        # with col2:
+        #     boxed_text('Nördliche Wassergeschwindigkeit [m/s]', current_vo)
+        #     st.divider()
+        #     boxed_text('Östliche Wassergeschwindigkeit [m/s]', current_uo)
+        #     st.divider()
+        #     boxed_text('Wasseroberfläche über Geoid [m]', current_zos)
                        
             
             
@@ -409,24 +273,14 @@ class StreamlitApp:
         one_week_before = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 60*60*24*7))
         output_filename = 'subset_output.nc'
 
-
-
-
-        # Preload T-Box data (Things(3)) as Pandas Dataframe
-
         # Get ALL Timeseries data from FROST-Server
         server = FrostServer(thing="Things(3)")
         all_observations = server.get_all_observations()
         df_water_temperature = pd.DataFrame(all_observations)
         df_water_temperature["phenomenonTime"] = pd.to_datetime(df_water_temperature["phenomenonTime"])
         df_water_temperature["resultTime"] = pd.to_datetime(df_water_temperature["resultTime"])
-        df_water_temperature["phenomenonTime"] = df_water_temperature["phenomenonTime"].dt.round('S') # round phenomenonTime to YYYY-MM-DD HH:MM:SS
-        # Convert the whole column to ISO 8601 format
-        df_water_temperature["phenomenonTime"] = df_water_temperature["phenomenonTime"].apply(lambda x: x.isoformat())
-        df_water_temperature["resultTime"] = df_water_temperature["resultTime"].apply(lambda x: x.isoformat())
-        
+        df_water_temperature["phenomenonTime"] = df_water_temperature["phenomenonTime"].dt.round('h') # round phenomenonTime to YYYY-MM-DD HH:MM:SS
         df_water_temperature["result"] = df_water_temperature["result"].astype(float)
-
         df_water_temperature = df_water_temperature.loc[:, ['phenomenonTime', 'result']].drop_duplicates()
 
         # Get position data of T-Box
@@ -438,24 +292,132 @@ class StreamlitApp:
         thing_name = server.get_thing_name()
 
 
-        
+        start_datetime = df_water_temperature["phenomenonTime"].min()
+        start_datetime = start_datetime.strftime('%Y-%m-%d %H:%M:%S')
+        start_datetime = start_datetime.split(' ')[0]
 
-        preload_data = {
+        end_datetime = today.split(' ')[0]
+
+        # get weather data
+        omw = OpenMeteoWeather(latitude=latitude, 
+                        longitude=longitude, 
+                        start_date=start_datetime, 
+                        end_date=end_datetime
+                        )
+        df_omw = omw.get_weather_dataframe()
+
+        cols = ['date', 'wind_speed_10m', 'wind_direction_10m', 'temperature_2m', 'pressure_msl', 'relative_humidity_2m']
+        df_omw = df_omw[cols]
+        df_omw["date"] = pd.to_datetime(df_omw["date"])
+
+        #merge weather data with water temperature data
+        df_merged = pd.merge(df_water_temperature, df_omw, left_on='phenomenonTime', right_on='date', how='left').drop('date', axis=1)
+        #print(df_merged.columns)
+
+        # convert datetime to isoformat
+        df_merged["phenomenonTime"] = df_merged["phenomenonTime"].apply(lambda x: x.isoformat())
+
+
+    
+        preload_data = [{
             'name': thing_name,
             'coordinates': coordinates_t_box,
-            'measurements': df_water_temperature.to_dict(),
-
-
-        }
+            'measurements': {
+                'time': df_merged['phenomenonTime'].tolist(),
+                'water_temperature': df_merged['result'].tolist(),
+                'wind_speed': df_merged['wind_speed_10m'].tolist(),
+                'wind_direction': df_merged['wind_direction_10m'].tolist(),
+                'air_temperature': df_merged['temperature_2m'].tolist(),
+                'air_pressure': df_merged['pressure_msl'].tolist(),
+                'air_humidity': df_merged['relative_humidity_2m'].tolist()
+                
+            }
+        }]
         
-        print(json.dumps(preload_data, indent=4, ensure_ascii=True))
+        # Preload marinas from marinas.json
+
+        marinas = self.get_json_data('marinas.json')
+        for marina in marinas:
+            marina_name = marina['name']
+            marina_latitude = marina['location']['latitude']
+            marina_longitude = marina['location']['longitude']
+            marina_radius = 0.1
+
+            minimum_longitude = marina_longitude - marina_radius
+            maximum_longitude = marina_longitude + marina_radius
+
+            minimum_latitude = marina_latitude - marina_radius
+            maximum_latitude = marina_latitude + marina_radius
+
+            marina_data = ac.get_subset(
+                dataset_id="cmems_mod_glo_phy_anfc_0.083deg_PT1H-m",
+                dataset_version="202406",
+                variables=["so", "thetao", "vo", "zos", "uo"], 
+                minimum_longitude=minimum_longitude,
+                maximum_longitude=maximum_longitude,
+                minimum_latitude=minimum_latitude,
+                maximum_latitude=maximum_latitude,
+                start_datetime=one_week_before,
+                end_datetime=today,
+                minimum_depth=0.49402499198913574,
+                maximum_depth=0.49402499198913574,
+                coordinates_selection_method="strict-inside",
+                disable_progress_bar=False,
+                output_filename=output_filename
+                )
+            ac.delete_dataset(output_filename)
+
+            marina_df = marina_data.to_dataframe().reset_index()
+            marina_df = marina_df.dropna(axis=0, how='any')
+            marina_df_grouped = marina_df.groupby('time').mean().reset_index()
+            marina_df_grouped.sort_values(by='time', ascending=False, inplace=True)
+            marina_df_grouped['time'] = pd.to_datetime(marina_df_grouped['time']).dt.tz_localize('UTC')
+
+            omw = OpenMeteoWeather(latitude=marina_latitude, 
+                        longitude=marina_longitude, 
+                        start_date=start_datetime, 
+                        end_date=end_datetime
+                        )
+            df_omw = omw.get_weather_dataframe()
+
+            cols = ['date', 'wind_speed_10m', 'wind_direction_10m', 'temperature_2m', 'pressure_msl', 'relative_humidity_2m']
+            df_omw = df_omw[cols]
+            df_omw["date"] = pd.to_datetime(df_omw["date"])
+
+            #merge weather data with water temperature data
+            df_merged = pd.merge(marina_df_grouped, df_omw, left_on='time', right_on='date', how='left').drop('date', axis=1)
+
+            marina_df_grouped["time"] = marina_df_grouped["time"].apply(lambda x: x.isoformat())
+
+            marina_data = {
+                'name': marina_name,
+                'coordinates': [marina_longitude, marina_latitude],
+                'measurements': {
+                    'time': marina_df_grouped['time'].tolist(),
+                    'water_temperature': marina_df_grouped['thetao'].tolist(),
+                    'wind_speed': df_merged['wind_speed_10m'].tolist(),
+                    'wind_direction': df_merged['wind_direction_10m'].tolist(),
+                    'air_temperature': df_merged['temperature_2m'].tolist(),
+                    'air_pressure': df_merged['pressure_msl'].tolist(),
+                    'air_humidity': df_merged['relative_humidity_2m'].tolist()
+                }
+            }
+
+
+            preload_data.append(marina_data)
+            break
+
+        # # save reload_data to json file
+        # with open('preload_data.json', 'w') as f:
+        #     json.dump(preload_data, f, indent=4, ensure_ascii=True)
+        
         
 
 
 
 
 
-        return None
+        return preload_data
 
 
 
