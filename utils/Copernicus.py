@@ -56,3 +56,27 @@ class AdvancedCopernicus:
             if file.endswith(".nc"):
                 os.remove(file)
         
+
+
+if __name__ == '__main__':
+    import time
+    copernicus = AdvancedCopernicus()
+    
+    subset = copernicus.get_subset(
+                dataset_id="cmems_mod_glo_phy_anfc_0.083deg_PT1H-m",
+                dataset_version="202406",
+                variables=["so", "thetao", "vo", "zos", "uo"], 
+                minimum_longitude=50,
+                maximum_longitude=51,
+                minimum_latitude=10,
+                maximum_latitude=11,
+                start_datetime=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
+                end_datetime=time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 60*60*24*7)),
+                minimum_depth=0.49402499198913574,
+                maximum_depth=0.49402499198913574,
+                coordinates_selection_method="strict-inside",
+                disable_progress_bar=False,
+                output_filename='output_filename.nc'
+                )
+    
+    copernicus.delete_dataset('output_filename.nc')
