@@ -22,7 +22,7 @@ class StreamlitApp:
 
     def __init__(self):
         #self.fig = fig
-        self.df_obs = self.get_data()
+        self.df_obs = self.get_frost_observations()
         self.position_data = self.get_position_data()
         self.marinas = self.get_json_data('marinas.json')
         
@@ -46,6 +46,8 @@ class StreamlitApp:
         with st.expander("Visualisierung", expanded=True):
             self.section3()
         st.divider()
+
+    
 
     
     
@@ -264,7 +266,7 @@ class StreamlitApp:
         fig = go.Figure()
 
         if self.selected_marina == 'Badesteg Reventlou':
-            self.df_obs = self.get_data()
+            self.df_obs = self.get_frost_observations()
 
             # get the last 7 days
             last_7_days = self.df_obs["phenomenonTime"].iloc[-1] - pd.DateOffset(days=7)
@@ -332,7 +334,7 @@ class StreamlitApp:
         )
 
 
-    def get_data(self, thing="Things(3)"):
+    def get_frost_observations(self, thing="Things(3)"):
         try:
 
             #print('Get data')
@@ -399,6 +401,95 @@ class StreamlitApp:
             
 
         return m
+    
+
+    def preload_data(self):
+
+        today = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        one_week_before = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time.time() - 60*60*24*7))
+        output_filename = 'subset_output.nc'
+
+
+
+
+        # Preload T-Box data (Things(3)) as Pandas Dataframe
+
+        # Get ALL Timeseries data from FROST-Server
+        server = FrostServer(thing="Things(3)")
+        all_observations = server.get_all_observations()
+        df_water_temperature = pd.DataFrame(all_observations)
+        df_water_temperature["phenomenonTime"] = pd.to_datetime(df_water_temperature["phenomenonTime"])
+        df_water_temperature["resultTime"] = pd.to_datetime(df_water_temperature["resultTime"])
+        df_water_temperature["phenomenonTime"] = df_water_temperature["phenomenonTime"].dt.round('S') # round phenomenonTime to YYYY-MM-DD HH:MM:SS
+        # Convert the whole column to ISO 8601 format
+        df_water_temperature["phenomenonTime"] = df_water_temperature["phenomenonTime"].apply(lambda x: x.isoformat())
+        df_water_temperature["resultTime"] = df_water_temperature["resultTime"].apply(lambda x: x.isoformat())
+        
+        df_water_temperature["result"] = df_water_temperature["result"].astype(float)
+
+        df_water_temperature = df_water_temperature.loc[:, ['phenomenonTime', 'result']].drop_duplicates()
+
+        # Get position data of T-Box
+        position_url = server.get_position_url()
+        content = server.get_content(position_url)
+        coordinates_t_box =  content['value'][0]['location']['coordinates']
+        longitude, latitude = coordinates_t_box[0], coordinates_t_box[1]
+
+        thing_name = server.get_thing_name()
+
+
+        
+
+        preload_data = {
+            'name': thing_name,
+            'coordinates': coordinates_t_box,
+            'measurements': df_water_temperature.to_dict(),
+
+
+        }
+        
+        print(json.dumps(preload_data, indent=4, ensure_ascii=True))
+        
+
+
+
+
+
+        return None
+
+
+
+
+        # minimum_longitude = longitude - radius
+        # maximum_longitude = longitude + radius
+
+        # minimum_latitude = latitude - radius
+        # maximum_latitude = latitude + radius
+        
+
+        # self.marina_data = ac.get_subset(
+        #         dataset_id="cmems_mod_glo_phy_anfc_0.083deg_PT1H-m",
+        #         dataset_version="202406",
+        #         variables=["so", "thetao", "vo", "zos", "uo"], 
+        #         minimum_longitude=minimum_longitude,
+        #         maximum_longitude=maximum_longitude,
+        #         minimum_latitude=minimum_latitude,
+        #         maximum_latitude=maximum_latitude,
+        #         start_datetime=one_week_before,
+        #         end_datetime=today,
+        #         minimum_depth=0.49402499198913574,
+        #         maximum_depth=0.49402499198913574,
+        #         coordinates_selection_method="strict-inside",
+        #         disable_progress_bar=False,
+        #         output_filename=output_filename
+        #         )
+        # ac.delete_dataset(output_filename)
+
+
+
+
+
+
             
         
         
@@ -411,5 +502,12 @@ class StreamlitApp:
 if __name__ == '__main__':
 
     app = StreamlitApp()
-    app.header()
+
+
+    content = app.preload_data()
+
+    
+
+
+    #app.header()
     #app.sidebar()
