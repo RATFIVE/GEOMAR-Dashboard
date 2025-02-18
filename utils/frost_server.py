@@ -40,6 +40,11 @@ class FrostServer:
         observation_url = content_datastream['value'][0]["Observations@iot.navigationLink"]
         return observation_url
     
+    def get_thing_name(self):
+        content = self.get_content(self.url + self.thing)
+        name_url = content['name']
+        return name_url
+    
     def print_content(self, content):
         return print(json.dumps(content, indent=4, ensure_ascii=False))
     
