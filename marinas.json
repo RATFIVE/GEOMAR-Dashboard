@@ -1,6 +1,6 @@
 [
     {
-        "name": "Hafen Flensburg Sonwik",
+        "name": "Sonwik Yachthafen Flensburg",
         "location": {
             "latitude": 54.793,
             "longitude": 9.441
@@ -10,20 +10,6 @@
             "zip": "24944",
             "city": "Flensburg",
             "country": "Germany"
-        }
-    },
-    {
-        "name": "Port de Locudy",
-        "location": {
-            "latitude": 47.00,
-            "longitude": -4.414
-
-        },
-        "address": {
-            "street": "Port de Locudy",
-            "zip": "29750",
-            "city": "Loctudy",
-            "country": "France"
         }
     },
     {
@@ -40,33 +26,6 @@
         }
     },
     {
-        "name": "Naturhafen Krummin",
-        "location": {
-            "latitude": 54.045813,
-            "longitude": 13.849808
-
-        },
-        "address": {
-            "street": "Am Hafen 1",
-            "zip": "17440",
-            "city": "Krummin",
-            "country": "Germany"
-        }
-    },
-    {
-        "name": "Marina Laguenstadt Ueckermüde",
-        "location": {
-            "latitude": 53.812,
-            "longitude": 14.040
-        },
-        "address": {
-            "street": "Am Stettiner Haff 1",
-            "zip": "17373",
-            "city": "Ueckermünde",
-            "country": "Germany"
-        }
-    },
-    {
         "name": "Badesteg Reventlou",
         "location": {
             "latitude": 54.3323,
@@ -78,6 +37,19 @@
             "city": "Kiel",
             "country": "Germany"
         }
+    },
+    {
+        "name": "Kappeln",
+        "location": {
+            "latitude": 54.655,
+            "longitude": 9.934
+        },
+        "address": {
+            "street": "Hafenstraße 1",
+            "zip": "24376",
+            "city": "Kappeln",
+            "country": "Germany"
+        }
     }
-
+    
 ]
