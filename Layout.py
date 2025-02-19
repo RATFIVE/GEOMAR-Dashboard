@@ -115,7 +115,7 @@ class StreamlitApp:
                 st.markdown(
                     f"""
                     <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
-                        {text}:
+                        {text}
                     </div>
                     <div style="display: flex; justify-content: center;">
                         <pre style="
@@ -327,8 +327,9 @@ class StreamlitApp:
         # Initialize a map centered around the coordinates
         m = folium.Map(
             
-            # locatio to middle of Germany
-            location=[51.1657, 10.4515],
+            # locatio to kiel
+            location=[54.323293, 10.122765],
+            
            
             # zoom to Europa
             zoom_start=5,)
