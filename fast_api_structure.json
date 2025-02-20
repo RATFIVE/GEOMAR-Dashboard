@@ -1,0 +1,30 @@
+{   "name": "Dashboard",
+
+    "ozean_data_name": "ozean_data",
+    "ozean_data_link": "https://localhost:8000/ozean_data", 
+
+    "weather_data_name": "weather_data",
+    "weather_data_link": "https://localhost:8000/weather_data",
+}
+
+
+{
+    "name": "Weather Data",
+
+    "meseaurments": {
+        "time": ["time", "time"],
+        "temperature": ["temperature", "temperature"],
+        "humidity": ["humidity", "humidity"],
+    }
+
+
+}
+
+
+{
+    "name": "Ozean Data",
+
+    "time": ["time", "time"],
+    "temperature": ["temperature", "temperature"],
+    "salinity": ["salinity", "salinity"],
+}
