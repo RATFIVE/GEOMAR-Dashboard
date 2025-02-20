@@ -14,7 +14,7 @@ import json
 import folium
 from utils.Copernicus import AdvancedCopernicus
 from utils.OpenMeteoWeather import OpenMeteoWeather
-
+st.set_page_config(layout="wide", page_title="SOOP-Dashboard", page_icon=":shark:")
 
 ac = AdvancedCopernicus() 
 
@@ -84,7 +84,7 @@ class StreamlitApp:
             st.session_state['map'] = self.make_map()
 
         m = st.session_state['map']
-        st_folium(m, width=1000, height=500)
+        st_folium(m, width=2000, height=500)
 
         
     
@@ -114,7 +114,7 @@ class StreamlitApp:
             with st.container():
                 st.markdown(
                     f"""
-                    <div style="text-align: center; font-size: 18px; font-weight: bold; margin-bottom: 10px;">
+                    <div style="text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 10px;">
                         {text}
                     </div>
                     <div style="display: flex; justify-content: center;">
@@ -125,9 +125,11 @@ class StreamlitApp:
                             border: 1px solid #ddd;
                             text-align: left;
                             width: fit-content;
-                            max-width: 80%;
+                            max-width: 100%;
                             white-space: pre-wrap;
                             word-wrap: break-word;
+                            font-size: 30px;  
+                            font-weight: bold;  
                         ">
                     {value}
                         </pre>
@@ -138,6 +140,10 @@ class StreamlitApp:
 
         # convert marina time from 2025-02-19T10:00:00+00:00 to 2025-02-19 10:00:00
         marina_time = marina_time.split('T')[0] + ' ' + marina_time.split('T')[1].split('+')[0]
+        col1, col2, col3 = st.columns(3, vertical_alignment='center')
+        with col2:
+            st.markdown(f"<h3 style='text-align: center;'>{marina_name}</h3>", unsafe_allow_html=True)
+
         col1, col2 = st.columns(2)
         with col1:
             boxed_text('Aktuelle Zeit', marina_time)
@@ -171,6 +177,7 @@ class StreamlitApp:
 
 
     def section3(self):
+        
 
         fig = go.Figure()
 
@@ -190,6 +197,9 @@ class StreamlitApp:
                 marina_air_pressure = marina['measurements']['air_pressure']
                 marina_air_humidity = marina['measurements']['air_humidity']
                 break
+        col1, col2, col3 = st.columns(3, vertical_alignment='center')
+        with col2:
+            st.markdown(f"<h3 style='text-align: center;'>{marina_name}</h3>", unsafe_allow_html=True)
 
         def make_line_plot(x, y, title, x_label, y_label):
             fig = go.Figure()
@@ -201,9 +211,15 @@ class StreamlitApp:
             ))
 
             fig.update_layout(
-                title=title,
-                xaxis_title=x_label,
-                yaxis_title=y_label,
+                title={'text': title, 'font': {'size': 20}},  # Titel größer
+                xaxis={
+                    'title': {'text': x_label, 'font': {'size': 18}},  # X-Achsenbeschriftung größer
+                    'tickfont': {'size': 14}  # X-Achsenticks größer
+                },
+                yaxis={
+                    'title': {'text': y_label, 'font': {'size': 18}},  # Y-Achsenbeschriftung größer
+                    'tickfont': {'size': 14}  # Y-Achsenticks größer
+                },
                 template='plotly_white',
                 hovermode='x unified'
             )
@@ -328,7 +344,8 @@ class StreamlitApp:
         m = folium.Map(
             
             # locatio to kiel
-            location=[54.323293, 10.122765],
+            location=[54.330123, 10.162420],
+            width='100%',
             
            
             # zoom to Europa
