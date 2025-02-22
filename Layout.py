@@ -18,6 +18,28 @@ st.set_page_config(layout="wide", page_title="SOOP-Dashboard", page_icon=":shark
 
 ac = AdvancedCopernicus() 
 
+# Prussian blue
+# #053246
+# R5 G50 B70
+
+# Mantis
+# #78D278
+# R120 G210 B120
+
+# Bittersweet
+# #FF6666
+# R255 G102 B102
+
+
+# Color Theme
+# [theme]
+# base="light"
+# primaryColor="#ff6666"
+# secondaryBackgroundColor="#78d278"
+# textColor="#053246"
+
+
+
 
 class StreamlitApp:
 
@@ -207,7 +229,9 @@ class StreamlitApp:
                 x=x,
                 y=y,
                 mode='lines',
-                name=title
+                name=title,
+                line=dict(color='rgb(255, 102, 102)', 
+                          width=2)
             ))
 
             fig.update_layout(
@@ -365,7 +389,7 @@ class StreamlitApp:
                 [latitude, longitude],
                 popup=f"{name} \n Aktuelle Temperatur: {current_temp}°C",
                 tooltip=f'{name}',
-                icon=folium.Icon(icon="info-sign", color="red")
+                icon=folium.Icon(icon="info-sign", color="lightred")
             ).add_to(m)
 
 
