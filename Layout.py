@@ -14,7 +14,7 @@ import json
 import folium
 from utils.Copernicus import AdvancedCopernicus
 from utils.OpenMeteoWeather import OpenMeteoWeather
-st.set_page_config(layout="wide", page_title="SOOP-Dashboard", page_icon=":shark:")
+#st.set_page_config(layout="wide", page_title="SOOP-Dashboard", page_icon=":shark:")
 
 ac = AdvancedCopernicus() 
 
