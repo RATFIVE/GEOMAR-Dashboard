@@ -6,6 +6,13 @@ from streamlit_folium import st_folium
 import folium
 import requests
 
+# Colors
+# [theme]
+# base="light"
+# primaryColor="#ff6666"
+# secondaryBackgroundColor="#78d278"
+# textColor="#053246"
+
 st.set_page_config(layout="wide", page_title="SOOP-Dashboard", page_icon=":shark:")
 
 API_URL = "http://localhost:8000/data"
@@ -90,16 +97,19 @@ class StreamlitApp:
         col1, col2, col3 = st.columns(3)
         with col2:
             st.markdown(f"<h3 style='text-align: center;'>{selected_marina}</h3>", unsafe_allow_html=True)
-
+            windrose = self.make_windrose(measurement.get("wind_direction"))
+            st.plotly_chart(windrose)
         col1, col2 = st.columns(2)
         with col1:
             self.boxed_text("Aktuelle Zeit", formatted_time)
             st.divider()
+            
             for key, value in list(data_dict.items())[:3]:
                 self.boxed_text(key, round(value["values"], 3) if value.all() else "N/A")
                 st.divider()
 
         with col2:
+
             for key, value in list(data_dict.items())[3:]:
                 self.boxed_text(key, round(value["values"], 3) if value.all() else "N/A")
                 st.divider()
@@ -186,7 +196,7 @@ class StreamlitApp:
 
         # Initialize map centered on Kiel
         m = folium.Map(location=[latitude_mean, longitude_mean], 
-                       zoom_start=7)
+                       zoom_start=7, control_scale=False)
         
         for marina in self.preloaded_data:
             try:
@@ -243,6 +253,57 @@ class StreamlitApp:
                 print(f"Error processing {name}: {e}")
 
         return m
+    
+    def make_windrose(self, data):
+        import plotly.graph_objects as go
+
+        # Beispiel-Daten: Windrichtung in Grad (0° = N, 90° = E, 180° = S, 270° = W)
+        wind_directions = [0]  # Nord
+        wind_speeds = [30]  # Windgeschwindigkeit
+
+        # Erstellen des Plots
+        fig = go.Figure()
+
+        fig.add_trace(go.Barpolar(
+            r=wind_speeds,  # Windgeschwindigkeit als Radius
+            theta=wind_directions,  # Windrichtung in Grad
+            width=45,  # Breite der Balken (45° für 8 Himmelsrichtungen)
+            marker=dict(
+                color=wind_speeds,
+                colorscale='Oranges',  
+                showscale=True,
+                cmin=0,  # Minimaler Wert der Skala
+                cmax=50,  # Maximaler Wert der Skala
+                colorbar=dict(
+                    x=1,  # Position der Skala
+                    y=0.5,  # Vertikale Position
+                    len=1,  # Höhe der Skala
+                    title="Wind (m/s)",  # Titel der Skala
+                    tickvals=[0, 10, 20, 30, 40, 50],  # Definierte Werte
+                    #ticktext=["0", "Leicht", "Mittel", "Stark", "Sehr stark", "Extrem"]  # Eigene Labels
+                )
+            )
+        ))
+
+        # Theme anwenden
+        fig.update_layout(
+            
+            plot_bgcolor="#78d278",  # Hintergrund des Plots
+            font=dict(color="#053246"),  # Allgemeine Textfarbe
+            # size
+            width=300,
+            height=300,
+            polar=dict(
+                radialaxis=dict(showticklabels=False, ticksuffix=" m/s"),
+                angularaxis=dict(direction="clockwise", tickmode="array",
+                                tickvals=[0, 90, 180, 270],
+                                ticktext=['N', 'E', 'S', 'W'])  # Himmelsrichtungen
+            )
+        )
+
+        return fig
+
+
 
 
 app = StreamlitApp()
