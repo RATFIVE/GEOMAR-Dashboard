@@ -113,13 +113,13 @@ class OpenMeteoWeather:
         forecast_data = self.process_weather_data(forecast_data)
 
         
-        merged = pd.concat([archive_data, forecast_data]).sort_values("date", ascending=False).reset_index(drop=True)
+        merged = pd.concat([archive_data, forecast_data]).sort_values("time", ascending=False).reset_index(drop=True)
         return merged
 
     def process_weather_data(self, response):
         # Process hourly data
         hourly = response.Hourly()
-        hourly_data = {"date": pd.date_range(
+        hourly_data = {"time": pd.date_range(
             start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
             end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
             freq=pd.Timedelta(seconds=hourly.Interval()),
