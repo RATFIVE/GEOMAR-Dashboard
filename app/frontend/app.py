@@ -60,6 +60,7 @@ class StreamlitApp:
         st.divider()
 
     def section1(self):
+
         if "selected_marinas" not in st.session_state:
             st.session_state["selected_marinas"] = [marina["name"] for marina in self.preloaded_data]
 
@@ -258,8 +259,8 @@ class StreamlitApp:
         import plotly.graph_objects as go
 
         # Beispiel-Daten: Windrichtung in Grad (0° = N, 90° = E, 180° = S, 270° = W)
-        wind_directions = [0]  # Nord
-        wind_speeds = [30]  # Windgeschwindigkeit
+        wind_directions = [316]  # Nord
+        wind_speeds = [21,3]  # Windgeschwindigkeit
 
         # Erstellen des Plots
         fig = go.Figure()
@@ -270,16 +271,16 @@ class StreamlitApp:
             width=45,  # Breite der Balken (45° für 8 Himmelsrichtungen)
             marker=dict(
                 color=wind_speeds,
-                colorscale='Oranges',  
+                colorscale='Reds',  
                 showscale=True,
                 cmin=0,  # Minimaler Wert der Skala
                 cmax=50,  # Maximaler Wert der Skala
                 colorbar=dict(
                     x=1,  # Position der Skala
                     y=0.5,  # Vertikale Position
-                    len=1,  # Höhe der Skala
+                    len=1.7,  # Höhe der Skala
                     title="Wind (m/s)",  # Titel der Skala
-                    tickvals=[0, 10, 20, 30, 40, 50],  # Definierte Werte
+                    tickvals=[0, 10, 20, 30, 40, 50, 100],  # Definierte Werte
                     #ticktext=["0", "Leicht", "Mittel", "Stark", "Sehr stark", "Extrem"]  # Eigene Labels
                 )
             )
