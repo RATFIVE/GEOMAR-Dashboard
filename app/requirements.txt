@@ -6,3 +6,4 @@ folium
 streamlit-folium
 copernicusmarine
 xarray
+fastapi[standard]
