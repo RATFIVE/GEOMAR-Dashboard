@@ -1,6 +1,7 @@
 import copernicusmarine
 import xarray as xr
 import os
+import time
 
 class AdvancedCopernicus:
     def __init__(self):
@@ -47,9 +48,12 @@ class AdvancedCopernicus:
             output_filename=output_filename
         )
         # Load the downloaded NetCDF file into an xarray Dataset
-        return xr.open_dataset(output_filename)
+        data = xr.open_dataset(output_filename)
+        df = data.to_dataframe().reset_index()
+        data.close()
+        return df
     
-    def delete_dataset(self, file_name):
+    def delete_dataset(self, file_name): 
         os.remove(file_name)
         #delete all file with .nc extension
         for file in os.listdir():
