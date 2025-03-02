@@ -40,7 +40,7 @@ for marina in marinas:
 
 
 
-    marina_data = ac.get_subset(
+    marina_df = ac.get_subset(
         dataset_id="cmems_mod_glo_phy_anfc_0.083deg_PT1H-m",
         dataset_version="202406",
         variables=["so", "thetao", "vo", "zos", "uo"], 
@@ -57,13 +57,14 @@ for marina in marinas:
         output_filename=OUTPUT_FILENAME
         )
     
-    ac.delete_dataset(OUTPUT_FILENAME)
+    
 
-    marina_df = marina_data.to_dataframe().reset_index()
+    #marina_df = marina_data.to_dataframe().reset_index()
     marina_df = marina_df.dropna(axis=0, how='all')
     marina_df_grouped = marina_df.groupby('time').mean()
     marina_df_grouped.sort_values(by='time', ascending=False, inplace=True)
     marina_df_grouped.reset_index(inplace=True)
+    ac.delete_dataset(OUTPUT_FILENAME)
 
     omw = OpenMeteoWeather(
             latitude=marina_latitude, 
