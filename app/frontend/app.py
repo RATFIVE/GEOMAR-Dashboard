@@ -6,6 +6,7 @@ from streamlit_folium import st_folium
 import folium
 import requests
 from utils.Visualisations import ShowMap, LinePlot, Windrose
+import hashlib
 
 # Colors
 # [theme]
@@ -18,25 +19,46 @@ st.set_page_config(layout="wide", page_title="SOOP-Dashboard", page_icon=":shark
 
 API_URL = "http://localhost:8000/data"
 
+# Funktion zur Berechnung eines Hash-Werts für die Daten
+def hash_data(data):
+    return hashlib.md5(str(data).encode()).hexdigest()
+
 class StreamlitApp:
+
+    
     def __init__(self):
+
         if 'preloaded_data' not in st.session_state:
             st.session_state['preloaded_data'] = self.preload_data()
-        self.preloaded_data = st.session_state['preloaded_data']
 
+        showmap = ShowMap(data=st.session_state['preloaded_data'], zoom=7, control_scale=True)
+
+        if "map" not in st.session_state:
+                # m = folium.Map(location=[54.3233, 10.1228], zoom_start=10)  # Beispiel Kiel
+                # folium.Marker([54.3233, 10.1228], tooltip="Kiel").add_to(m)
+                # st.session_state["map"] = m
+            m = showmap.plot()
+            st.session_state["map"] = m
+        #self.map = st.session_state["map"]
+
+
+        
+    
     def preload_data(self):
         try:
             return requests.get(API_URL).json()
         except:
             return []
-
+        
+    
     def get_last_measurement(self, measurement):
         """Returns the latest measurement from a list of time-series data."""
         if not measurement:
             return None
         df = pd.DataFrame.from_dict(measurement).sort_values("time", ascending=False)
         return df.iloc[0] if not df.empty else None
-
+    
+    
     def get_measurements(self, measurement):
         """Converts measurement data into a sorted DataFrame."""
         if not measurement:
@@ -47,7 +69,9 @@ class StreamlitApp:
         df.dropna(inplace=True)
         return df.sort_values("time", ascending=False) if not df.empty else None
 
+    #st.write(st.session_state)
     def header(self):
+        #st.write(st.session_state["map"])
         st.markdown("<h1 style='text-align: center;'>SOOP</h1>", unsafe_allow_html=True)
         st.divider()
         with st.expander("Marinas", expanded=True):
@@ -60,24 +84,24 @@ class StreamlitApp:
             self.section3()
         st.divider()
 
+    
     def section1(self):
 
         if "selected_marinas" not in st.session_state:
-            st.session_state["selected_marinas"] = [marina["name"] for marina in self.preloaded_data]
+            st.session_state["selected_marinas"] = [marina["name"] for marina in st.session_state['preloaded_data']]
 
         selected_marina = st.selectbox("Wähle den Hafen aus:", st.session_state["selected_marinas"])
         st.session_state["selected_marina"] = selected_marina
 
-        if "map" not in st.session_state:
-            m = ShowMap(data=self.preloaded_data, zoom=7, control_scale=False).plot()
-            st.session_state["map"] = m
-            
+        #if 'map' in st.session_state:
+        #st_folium(st.session_state['map'], width=1000, height=500)
+        st.plotly_chart(st.session_state['map'], width=1000, height=700)
+     
 
-        st_folium(st.session_state["map"], width=1000, height=500)
-
+    
     def section2(self):
         selected_marina = st.session_state.get("selected_marina", None)
-        marina_data = next((m for m in self.preloaded_data if m["name"] == selected_marina), None)
+        marina_data = next((m for m in st.session_state['preloaded_data'] if m["name"] == selected_marina), None)
 
         if not marina_data:
             st.warning("Keine Daten verfügbar")
@@ -101,8 +125,14 @@ class StreamlitApp:
         col1, col2, col3 = st.columns(3)
         with col2:
             st.markdown(f"<h3 style='text-align: center;'>{selected_marina}</h3>", unsafe_allow_html=True)
-            windrose = Windrose(data=None).plot()
-            st.plotly_chart(windrose)
+
+            if 'windrose' not in st.session_state:
+                windrose = Windrose(data=None).plot()
+                st.session_state['windrose'] = windrose
+            
+            #st.plotly_chart(st.session_state['windrose'])
+            
+
         col1, col2 = st.columns(2)
         with col1:
             self.boxed_text("Aktuelle Zeit", formatted_time)
@@ -137,9 +167,10 @@ class StreamlitApp:
             unsafe_allow_html=True,
         )
 
+    
     def section3(self):
         marina_name = st.session_state.get("selected_marina", None)
-        marina_data = next((m for m in self.preloaded_data if m["name"] == marina_name), None)
+        marina_data = next((m for m in st.session_state['preloaded_data'] if m["name"] == marina_name), None)
 
         if not marina_data:
             st.warning("Keine Daten verfügbar")
@@ -180,57 +211,15 @@ class StreamlitApp:
     
     
     
-    def make_windrose(self, data):
-        import plotly.graph_objects as go
-
-        # Beispiel-Daten: Windrichtung in Grad (0° = N, 90° = E, 180° = S, 270° = W)
-        wind_directions = [316]  # Nord
-        wind_speeds = [21,3]  # Windgeschwindigkeit
-
-        # Erstellen des Plots
-        fig = go.Figure()
-
-        fig.add_trace(go.Barpolar(
-            r=wind_speeds,  # Windgeschwindigkeit als Radius
-            theta=wind_directions,  # Windrichtung in Grad
-            width=45,  # Breite der Balken (45° für 8 Himmelsrichtungen)
-            marker=dict(
-                color=wind_speeds,
-                colorscale='Reds',  
-                showscale=True,
-                cmin=0,  # Minimaler Wert der Skala
-                cmax=50,  # Maximaler Wert der Skala
-                colorbar=dict(
-                    x=1,  # Position der Skala
-                    y=0.5,  # Vertikale Position
-                    len=1.7,  # Höhe der Skala
-                    title="Wind (m/s)",  # Titel der Skala
-                    tickvals=[0, 10, 20, 30, 40, 50, 100],  # Definierte Werte
-                    #ticktext=["0", "Leicht", "Mittel", "Stark", "Sehr stark", "Extrem"]  # Eigene Labels
-                )
-            )
-        ))
-
-        # Theme anwenden
-        fig.update_layout(
-            
-            plot_bgcolor="#78d278",  # Hintergrund des Plots
-            font=dict(color="#053246"),  # Allgemeine Textfarbe
-            # size
-            width=300,
-            height=300,
-            polar=dict(
-                radialaxis=dict(showticklabels=False, ticksuffix=" m/s"),
-                angularaxis=dict(direction="clockwise", tickmode="array",
-                                tickvals=[0, 90, 180, 270],
-                                ticktext=['N', 'E', 'S', 'W'])  # Himmelsrichtungen
-            )
-        )
-
-        return fig
+    
 
 
+if __name__ == "__main__":
+
+    if "app" not in st.session_state:
+        st.session_state["app"] = StreamlitApp()
+
+    app = st.session_state["app"]
+    app.header()
 
 
-app = StreamlitApp()
-app.header()
