@@ -18,7 +18,7 @@ def get_json_data(file):
         data = json.load(f)
     return data
 
-marinas = get_json_data('../data/marinas.json')
+marinas = get_json_data('app/data/marinas.json')
 
 marinas
 
