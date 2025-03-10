@@ -124,3 +124,6 @@ wrapt==1.17.2
 xarray==2025.1.2
 xyzservices==2025.1.0
 zarr==2.18.4
+plotly
+fastapi
+uvicorn
