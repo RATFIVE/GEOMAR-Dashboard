@@ -10,7 +10,7 @@ import hashlib
 import subprocess
 
 # Run ../backend/fastapi_app.py before running this script
-subprocess.run(["python", "backend/fast_api.py"])
+subprocess.run(["python", "app/backend/fast_api.py"])
 
 
 
