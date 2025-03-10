@@ -10,9 +10,7 @@ import hashlib
 import subprocess
 
 
-print("\nStarting FastAPI Server...\n")
-# Run ../backend/fastapi_app.py before running this script
-subprocess.run(["fastapi", "run", "app/backend/fast_api.py"])
+
 
 print("\nStarting Streamlit App...\n")
 
@@ -232,4 +230,6 @@ if __name__ == "__main__":
     app = st.session_state["app"]
     app.header()
 
-
+    print("\nStarting FastAPI Server...\n")
+    # Run ../backend/fastapi_app.py before running this script
+    subprocess.run(["fastapi", "run", "app/backend/fast_api.py"])
