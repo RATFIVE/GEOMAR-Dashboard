@@ -7,6 +7,14 @@ import folium
 import requests
 from utils.Visualisations import ShowMap, LinePlot, Windrose
 import hashlib
+import subprocess
+
+# Run ../backend/fastapi_app.py before running this script
+subprocess.run(["python", "../backend/fast_api.py"])
+
+
+
+
 
 # Colors
 # [theme]
