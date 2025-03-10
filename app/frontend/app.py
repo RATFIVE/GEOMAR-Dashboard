@@ -9,10 +9,12 @@ from utils.Visualisations import ShowMap, LinePlot, Windrose
 import hashlib
 import subprocess
 
+
+print("\nStarting FastAPI Server...\n")
 # Run ../backend/fastapi_app.py before running this script
-subprocess.run(["python", "app/backend/fast_api.py"])
+subprocess.run(["fastapi", "run", "app/backend/fast_api.py"])
 
-
+print("\nStarting Streamlit App...\n")
 
 
 
