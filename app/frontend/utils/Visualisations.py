@@ -60,89 +60,91 @@ class ShowMap:
         lat_mean = df_map["Latitude"].mean()
         lon_mean = df_map["Longitude"].mean()
 
-        # m = folium.Map(location=[lat_mean, lon_mean], zoom_start=self.zoom, control_scale=self.control_scale)
+        m = folium.Map(location=[lat_mean, lon_mean], zoom_start=self.zoom, control_scale=self.control_scale)
+        # Erstelle die Karte mit Plotly
+        fig = go.Figure()
+        # Add markers to map
+        for i, row in df_map.iterrows():
+            name = row["Name"]
+            lat = row["Latitude"]
+            lon = row["Longitude"]
+            temp = row["Temperature"]
 
-        # # Add markers to map
-        # for i, row in df_map.iterrows():
-        #     name = row["Name"]
-        #     lat = row["Latitude"]
-        #     lon = row["Longitude"]
-        #     temp = row["Temperature"]
+            # Custom HTML popup
+            popup_html = f"""
+                <div style="font-family: Arial; text-align: center;">
+                    <b>{name}</b><br>
+                    <hr style="margin: 5px 0;">
+                    <b>Temperatur:</b> {temp}°C
+                </div>
+            """
 
-        #     # Custom HTML popup
-        #     popup_html = f"""
-        #         <div style="font-family: Arial; text-align: center;">
-        #             <b>{name}</b><br>
-        #             <hr style="margin: 5px 0;">
-        #             <b>Temperatur:</b> {temp}°C
-        #         </div>
-        #     """
-
-        #     Marker(
-        #         [lat, lon],
-        #         popup=Popup(popup_html, max_width=300),
-        #         tooltip=name,
-        #         icon=folium.Icon(icon="info-sign", color="lightred")
-        #     ).add_to(m)
-
-
-        # # Erstelle die Karte mit Plotly
-        # fig = go.Figure(go.Scattermapbox(
-        #     lat=latitudes,
-        #     lon=longitudes,
-        #     mode="markers",
-        #     marker=dict(
-        #             size=180,
-        #             color=df_map["Temperature"],
-        #             colorscale="RdBu",
-        #             cmin=0,
-        #             cmax=30,
-        #             colorbar=dict(title="Wassertemperatur (°C)"),
-        #             symbol="marker",  # Alternativ "marker" oder "harbor"
-        #     ),
-        #     text=labels  # Text für die Marker
-        # ))
-
-        # fig.update_layout(
-        #     mapbox_style="open-street-map",
-        #     mapbox_center={"lat": 54.3233, "lon": 10.1228},
-        #     mapbox_zoom=7,
-        #     margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        #     height=500
-        # )
+            # Marker(
+            #     [lat, lon],
+            #     popup=Popup(popup_html, max_width=300),
+            #     tooltip=name,
+            #     icon=folium.Icon(icon="info-sign", color="lightred")
+            # ).add_to(m)
 
 
-        fig = go.Figure(go.Scattermap(
-        lat=df_map["Latitude"],
-        lon=df_map["Longitude"],
-        mode='markers',
-        marker=go.scattermap.Marker(
-            size=30,
-            
-            color='rgb(255, 255, 0)',
-            #symbol='marker'
-            symbol='harbor'
 
-        ),
-        text=df_map["Name"],
+            fig.add_trace(go.Scattermapbox(
+                lat=[lat],
+                lon=[lon],
+                mode="markers",
+
+                marker=dict(
+                        size=30,
+                        color='red',
+                        # symbol="marker",  # Alternativ "marker" oder "harbor"
+                ),
+            # text=labels  # Text für die Marker
             ))
 
         fig.update_layout(
-            #autosize=True,
-            height=500,
-            hovermode='closest',
-            map=dict(
-                bearing=0,
-                center=dict(
-                    lat=lat_mean,
-                    lon=lon_mean
-                ),
-                pitch=0,
-                zoom=self.zoom
-            ),
+            mapbox_style="open-street-map",
+            mapbox_center={"lat": 54.3233, "lon": 10.1228},
+            mapbox_zoom=7,
+            margin={"r": 0, "t": 0, "l": 0, "b": 0},
+            height=500
         )
-
         return fig
+    
+
+
+
+
+        # fig = go.Figure(go.Scattermap(
+        # lat=df_map["Latitude"],
+        # lon=df_map["Longitude"],
+        # mode='markers',
+        # marker=go.scattermap.Marker(
+        #     size=30,
+            
+        #     color='rgb(255, 0, 0)',
+        #     symbol='marker'
+        #     #symbol='harbor'
+
+        # ),
+        # text=df_map["Name"],
+        #     ))
+
+        # fig.update_layout(
+        #     #autosize=True,
+        #     height=500,
+        #     hovermode='closest',
+        #     map=dict(
+        #         bearing=0,
+        #         center=dict(
+        #             lat=lat_mean,
+        #             lon=lon_mean
+        #         ),
+        #         pitch=0,
+        #         zoom=self.zoom
+        #     ),
+        # )
+
+        # return fig
 
 
     

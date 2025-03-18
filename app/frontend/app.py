@@ -103,7 +103,7 @@ class StreamlitApp:
 
         #if 'map' in st.session_state:
         #st_folium(st.session_state['map'], width=1000, height=500)
-        st.plotly_chart(st.session_state['map'], width=1000, height=700)
+        st.plotly_chart(st.session_state['map'], width=1000, height=1000)
      
 
     
