@@ -27,9 +27,6 @@ st.set_page_config(layout="wide", page_title="SOOP-Dashboard", page_icon=":shark
 
 API_URL = "http://localhost:8000/data"
 
-# Funktion zur Berechnung eines Hash-Werts für die Daten
-def hash_data(data):
-    return hashlib.md5(str(data).encode()).hexdigest()
 
 class StreamlitApp:
 
@@ -39,24 +36,38 @@ class StreamlitApp:
         if 'preloaded_data' not in st.session_state:
             st.session_state['preloaded_data'] = self.preload_data()
 
-        showmap = ShowMap(data=st.session_state['preloaded_data'], zoom=7, control_scale=True)
+        #showmap = ShowMap(data=st.session_state['preloaded_data'], zoom=7, control_scale=True)
 
-        if "map" not in st.session_state:
+        #if "map" not in st.session_state:
                 # m = folium.Map(location=[54.3233, 10.1228], zoom_start=10)  # Beispiel Kiel
                 # folium.Marker([54.3233, 10.1228], tooltip="Kiel").add_to(m)
                 # st.session_state["map"] = m
-            m = showmap.plot()
-            st.session_state["map"] = m
+        #    m = showmap.plot()
+        #    st.session_state["map"] = m
         #self.map = st.session_state["map"]
 
 
         
     
     def preload_data(self):
-        try:
-            return requests.get(API_URL).json()
-        except:
-            return []
+
+        mode = 'forecast'
+        latitudes = [52.52, 52.52, 52.52]
+        longitudes = [13.41, 13.41, 13.41]
+        features = ["temperature_2m", "relative_humidity_2m", "wind_speed_10m"]
+        start_date = "2024-12-19"
+        end_date = "2025-03-19"
+
+        url_weather_forcast = f'https://api.open-meteo.com/v1/forecast?latitude=52.52,52.52,52.52&longitude=13.41,13.41,13.41&hourly=temperature_2m,relative_humidity_2m,wind_speed_10m&start_date=2024-12-19&end_date=2025-03-19'
+        url_weather_forcast = f'https://api.open-meteo.com/v1/{mode}?latitude={latitudes}&longitude={longitudes}&hourly={features}&start_date={start_date}&end_date={end_date}'
+
+        data = requests.get(url_weather_forcast).json()
+        print(data)
+
+        # try:
+        #     return requests.get(API_URL).json()
+        # except:
+        #     return []
         
     
     def get_last_measurement(self, measurement):
@@ -228,8 +239,9 @@ if __name__ == "__main__":
         st.session_state["app"] = StreamlitApp()
 
     app = st.session_state["app"]
-    app.header()
+    #app.header()
+    app.preload_data()
 
-    print("\nStarting FastAPI Server...\n")
-    # Run ../backend/fastapi_app.py before running this script
-    subprocess.run(["fastapi", "run", "app/backend/fast_api.py"])
+    # print("\nStarting FastAPI Server...\n")
+    # # Run ../backend/fastapi_app.py before running this script
+    # subprocess.run(["fastapi", "run", "app/backend/fast_api.py"])
