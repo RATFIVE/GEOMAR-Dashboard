@@ -86,20 +86,43 @@ class ShowMap:
             #     icon=folium.Icon(icon="info-sign", color="lightred")
             # ).add_to(m)
 
+            # fig.add_scattermapbox(
+            #     lat = bike_df['latitude'], 
+            #     lon = bike_df['longitude'], 
+            #     text = 'Easter Egg Bike', # 🚲
+            #     mode = 'markers', #+text
+            #     showlegend = False,
+            #     textposition='top center',
+            #     marker = dict(color='#9ec044'),
+            #     name='Easter Egg Bike',
+            #     hovertext = hover_text,
+            #     hoverinfo = 'text'
+            # )
 
-
-            fig.add_trace(go.Scattermapbox(
+            fig.add_scattermapbox(
                 lat=[lat],
                 lon=[lon],
                 mode="markers",
+                showlegend=False,
+                textposition='top center',
+                marker = dict(color='#9ec044'),
+                hovertext=popup_html,
+                hoverinfo='text',
+                text=name
+            )
 
-                marker=dict(
-                        size=30,
-                        color='red',
-                        # symbol="marker",  # Alternativ "marker" oder "harbor"
-                ),
-            # text=labels  # Text für die Marker
-            ))
+            # fig.add_trace(go.Scattermapbox(
+            #     lat=[lat],
+            #     lon=[lon],
+            #     mode="markers",
+
+            #     marker=dict(
+            #             size=30,
+            #             color='red',
+            #             symbol="harbor",  # Alternativ "marker" oder "harbor"
+            #     ),
+            # # text=labels  # Text für die Marker
+            # ))
 
         fig.update_layout(
             mapbox_style="open-street-map",
@@ -229,3 +252,41 @@ class Windrose:
         )
 
         return fig
+    
+
+if __name__ == '__main__':
+    test_data = [
+        {
+            "name": "Marina Kiel",
+            "location": {"latitude": 54.321, "longitude": 10.134},
+            "measurement": {
+                "water_temperature": [
+                    {"time": "2025-03-19T12:00:00Z", "values": 6.3},
+                    {"time": "2025-03-18T12:00:00Z", "values": 6.1}
+                ]
+            }
+        },
+        {
+            "name": "Marina Lübeck",
+            "location": {"latitude": 53.869, "longitude": 10.687},
+            "measurement": {
+                "water_temperature": [
+                    {"time": "2025-03-19T12:00:00Z", "values": 5.8},
+                    {"time": "2025-03-18T12:00:00Z", "values": 5.5}
+                ]
+            }
+        },
+        {
+            "name": "Marina Flensburg",
+            "location": {"latitude": 54.793, "longitude": 9.433},
+            "measurement": {
+                "water_temperature": [
+                    {"time": "2025-03-19T12:00:00Z", "values": 4.9},
+                    {"time": "2025-03-18T12:00:00Z", "values": 4.7}
+                ]
+            }
+        }
+    ]
+
+    map = ShowMap(test_data)
+    map.plot().show()
