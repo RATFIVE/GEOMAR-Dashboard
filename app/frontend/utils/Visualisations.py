@@ -62,7 +62,18 @@ class ShowMap:
 
         m = folium.Map(location=[lat_mean, lon_mean], zoom_start=self.zoom, control_scale=self.control_scale)
         # Erstelle die Karte mit Plotly
-        fig = go.Figure()
+        fig = px.scatter_mapbox(
+            lat=df_map["Latitude"],
+            lon=df_map["Longitude"],
+            #mode="markers",
+            #showlegend=False,
+            #textposition='top center',
+            #marker = dict(color='#9ec044'),
+            #hovertext=popup_html,
+            #hoverinfo='text',
+            text=df_map["Name"]
+        )
+
         # Add markers to map
         for i, row in df_map.iterrows():
             name = row["Name"]
@@ -100,16 +111,21 @@ class ShowMap:
             # )
 
             fig.add_scattermapbox(
-                lat=[lat],
-                lon=[lon],
+                lat=df_map["Latitude"],
+                lon=df_map["Longitude"],
                 mode="markers",
                 showlegend=False,
                 textposition='top center',
-                marker = dict(color='#9ec044'),
+                marker = dict(color='#9ec044',
+                              size=40,
+                              symbol="harbor"
+                              ),
                 hovertext=popup_html,
                 hoverinfo='text',
-                text=name
-            )
+                text=df_map["Name"]
+                )
+
+
 
             # fig.add_trace(go.Scattermapbox(
             #     lat=[lat],
