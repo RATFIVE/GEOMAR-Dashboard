@@ -87,7 +87,7 @@ class ShowMap:
             lon="Longitude",
             hover_name="hover_name",
             hover_data={"Latitude": False, "Longitude": False, "size": False},
-            color_discrete_sequence=[f"rgb{rgb_color}"],
+            color_discrete_sequence=[f"rgb(255, 102, 102)"],
             size='size',
             zoom=self.zoom,
             height=500
@@ -112,7 +112,6 @@ class ShowMap:
 
 
 
-
 class LinePlot:
     def __init__(self, x, y, title, x_label, y_label):
         self.x = x
@@ -120,17 +119,49 @@ class LinePlot:
         self.x_label = x_label
         self.y_label = y_label
         self.title = title
-
+        
+        # Konvertiere x in ein Datetime-Format, falls es nicht bereits ist
+        self.x = pd.to_datetime(self.x)
 
     def plot(self):
-        fig = go.Figure([go.Scatter(x=self.x, y=self.y, mode="lines", name=self.title,line=dict(color='rgb(255, 102, 102)', width=2))])
+        # Erstelle den Plot
+        fig = go.Figure([go.Scatter(x=self.x, y=self.y, mode="lines", name=self.title, line=dict(color='rgb(255, 102, 102)', width=2))])
+
+        # Dropdown-Menü für Zeitausschnitte
         fig.update_layout(
-                title={'text': self.title, 'font': {'size': 20}},  # Titel größer
-                xaxis={'title': {'text': self.x_label, 'font': {'size': 18}}, 'tickfont': {'size': 14}},  # X-Achse größer
-                yaxis={'title': {'text': self.y_label, 'font': {'size': 18}}, 'tickfont': {'size': 14}},  # Y-Achse größer
-                template='plotly_white',
-                hovermode='x unified'
-            )
+            title={'text': self.title, 'font': {'size': 20}},  
+            xaxis={'title': {'text': self.x_label, 'font': {'size': 18}}, 'tickfont': {'size': 14}},  
+            yaxis={'title': {'text': self.y_label, 'font': {'size': 18}}, 'tickfont': {'size': 14}},  
+            template='plotly_white',
+            hovermode='x unified',
+            updatemenus=[dict(
+                type="buttons",
+                x=1.05,  # Position der Buttons außerhalb des Plots (rechts)
+                y=1,      # Position der Buttons oberhalb des Plots
+                xanchor="left",  # Verankerung der Buttons an der linken Seite
+                yanchor="top",   # Verankerung der Buttons an der oberen Seite
+                showactive=False,
+                direction="down",  # Die Buttons werden untereinander angezeigt
+                buttons=[
+                    dict(
+                        label="Letzte 24 Stunden",
+                        method="relayout",
+                        args=["xaxis.range", [self.x.max() - pd.Timedelta(days=1), self.x.max()]]
+                    ),
+                    dict(
+                        label="Letzte 7 Tage",
+                        method="relayout",
+                        args=["xaxis.range", [self.x.max() - pd.Timedelta(days=7), self.x.max()]]
+                    ),
+                    dict(
+                        label="Letztes Jahr",
+                        method="relayout",
+                        args=["xaxis.range", [self.x.max() - pd.Timedelta(days=365), self.x.max()]]
+                    )
+                ]
+            )]
+        )
+
         return fig
 
 
@@ -226,5 +257,28 @@ if __name__ == '__main__':
         }
     ]
 
-    map = ShowMap(test_data)
-    map.plot()
+    # map = ShowMap(test_data)
+    # map.plot().show()
+
+
+    # Test von Line plot
+
+
+    # Erstellen von Testdaten
+    # Angenommen, die x-Achse ist ein Zeitraum von einem Jahr und y sind zufällige Werte.
+    date_range = pd.date_range(start="2023-03-21", end="2024-03-21", freq="h")
+    y_values = np.random.randn(len(date_range))  # Zufällige Daten für y-Werte
+
+    # Die Testdaten für die LinePlot-Klasse
+    x_test = date_range
+    y_test = y_values
+    title_test = "Testdaten für LinePlot"
+    x_label_test = "Zeit"
+    y_label_test = "Wert"
+
+    # Rückgabe der Testdaten
+    #x_test, y_test, title_test, x_label_test, y_label_test
+
+    line_plot = LinePlot(x_test, y_test, title_test, x_label_test, y_label_test)
+    fig = line_plot.plot()
+    fig.show()

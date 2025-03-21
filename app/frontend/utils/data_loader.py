@@ -27,7 +27,7 @@ def get_marina_data():
     END_DATETIME = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     # Start Date 1 year ago
-    START_DATETIME = datetime.datetime.now() - datetime.timedelta(days=1)
+    START_DATETIME = datetime.datetime.now() - datetime.timedelta(days=356)
     START_DATETIME = START_DATETIME.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     RADIUS = 0.1
@@ -49,7 +49,7 @@ def get_marina_data():
         marina_df = ac.get_subset(
             dataset_id="cmems_mod_glo_phy_anfc_0.083deg_PT1H-m",
             dataset_version="202406",
-            variables=["so", "thetao", "vo", "zos", "uo"], 
+            variables=["thetao", "zos"], 
             minimum_longitude=minimum_longitude,
             maximum_longitude=maximum_longitude,
             minimum_latitude=minimum_latitude,
