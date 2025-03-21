@@ -9,46 +9,50 @@ from folium import Marker, Popup
 
 
 # -----------------------------------
-
-# Map function
-
 class ShowMap:
-    def __init__(self, data:dict, zoom:int=7, control_scale:bool=False):
+    def __init__(self, data: list[dict], zoom: int = 7, control_scale: bool = False):
+        """
+        Initialisiert die Klasse zur Darstellung einer Karte mit Marinas.
+        
+        :param data: Liste von Marinas mit Standort- und Messwertinformationen.
+        :param zoom: Zoom-Stufe der Karte.
+        :param control_scale: Ob eine Skalierungssteuerung angezeigt werden soll.
+        """
         self.data = data
         self.zoom = zoom
         self.control_scale = control_scale
 
-
-    
+    def extract_temperature(self, marina: dict) -> float | None:
+        """
+        Extrahiert die aktuellste verfügbare Wassertemperatur aus den Messwerten einer Marina.
+        
+        :param marina: Dictionary mit Messwerten der Marina.
+        :return: Letzte bekannte Wassertemperatur oder None, falls keine verfügbar.
+        """
+        measurement = marina.get("measurement", {})
+        water_temp_data = measurement.get("water_temperature")
+        
+        if water_temp_data:
+            df = pd.DataFrame.from_dict(water_temp_data)
+            df["time"] = pd.to_datetime(df["time"], errors="coerce")
+            df["values"] = pd.to_numeric(df["values"], errors="coerce")
+            df.dropna(inplace=True)
+            df.sort_values(by="time", ascending=False, inplace=True)
+            
+            return round(df["values"].iloc[0], 2) if not df.empty else None
+        return None
 
     def plot(self):
-        """Generates a Plotly map with markers for marinas, displaying water temperature."""
-        
-        # Daten extrahieren
+        """
+        Erstellt eine interaktive Karte mit den Marinas und deren Wassertemperatur.
+        """
+        # Standort- und Temperaturdaten extrahieren
         latitudes = [marina.get("location", {}).get("latitude") for marina in self.data]
         longitudes = [marina.get("location", {}).get("longitude") for marina in self.data]
         names = [marina.get("name", "Unknown Marina") for marina in self.data]
-        temperatures = []
+        temperatures = [self.extract_temperature(marina) for marina in self.data]
 
-        for marina in self.data:
-            measurement = marina.get("measurement", {})
-            water_temp_data = measurement.get("water_temperature")
-
-            if water_temp_data:
-                df = pd.DataFrame.from_dict(water_temp_data)
-                df["time"] = pd.to_datetime(df["time"], errors="coerce")
-                df["values"] = pd.to_numeric(df["values"], errors="coerce")
-                df.dropna(inplace=True)
-                df.sort_values(by="time", ascending=False, inplace=True)
-                
-                if not df.empty:
-                    temperatures.append(round(df["values"].iloc[0], 2))
-                else:
-                    temperatures.append(None)
-            else:
-                temperatures.append(None)
-
-        # DataFrame für Plotly erstellen
+        # DataFrame für die Karte erstellen
         df_map = pd.DataFrame({
             "Latitude": latitudes,
             "Longitude": longitudes,
@@ -56,134 +60,52 @@ class ShowMap:
             "Temperature": temperatures
         }).dropna()
 
-        # Mittlere Koordinaten für Karten-Zentrierung berechnen
+        # Falls keine Daten vorhanden sind, abbrechen
+        if df_map.empty:
+            print("Keine gültigen Daten für die Karte verfügbar.")
+            return
+
+        # Mittelwerte für die Karten-Zentrierung berechnen
         lat_mean = df_map["Latitude"].mean()
         lon_mean = df_map["Longitude"].mean()
 
-        m = folium.Map(location=[lat_mean, lon_mean], zoom_start=self.zoom, control_scale=self.control_scale)
-        # Erstelle die Karte mit Plotly
-        fig = px.scatter_mapbox(
-            lat=df_map["Latitude"],
-            lon=df_map["Longitude"],
-            #mode="markers",
-            #showlegend=False,
-            #textposition='top center',
-            #marker = dict(color='#9ec044'),
-            #hovertext=popup_html,
-            #hoverinfo='text',
-            text=df_map["Name"]
+        # Individuelle Hover-Informationen erstellen
+        df_map["hover_name"] = df_map.apply(
+            lambda row: f"{row['Name']}<br>Temperatur: {row['Temperature']}°C", axis=1
         )
 
-        # Add markers to map
-        for i, row in df_map.iterrows():
-            name = row["Name"]
-            lat = row["Latitude"]
-            lon = row["Longitude"]
-            temp = row["Temperature"]
+        df_map['size'] = 20  # Einheitliche Punktgröße
 
-            # Custom HTML popup
-            popup_html = f"""
-                <div style="font-family: Arial; text-align: center;">
-                    <b>{name}</b><br>
-                    <hr style="margin: 5px 0;">
-                    <b>Temperatur:</b> {temp}°C
-                </div>
-            """
+        # Hex-Farbe in RGB umwandeln
+        hex_color = "#78d278"
+        rgb_color = tuple(int(hex_color[i:i+2], 16) for i in (1, 3, 5))
 
-            # Marker(
-            #     [lat, lon],
-            #     popup=Popup(popup_html, max_width=300),
-            #     tooltip=name,
-            #     icon=folium.Icon(icon="info-sign", color="lightred")
-            # ).add_to(m)
-
-            # fig.add_scattermapbox(
-            #     lat = bike_df['latitude'], 
-            #     lon = bike_df['longitude'], 
-            #     text = 'Easter Egg Bike', # 🚲
-            #     mode = 'markers', #+text
-            #     showlegend = False,
-            #     textposition='top center',
-            #     marker = dict(color='#9ec044'),
-            #     name='Easter Egg Bike',
-            #     hovertext = hover_text,
-            #     hoverinfo = 'text'
-            # )
-
-            fig.add_scattermapbox(
-                lat=df_map["Latitude"],
-                lon=df_map["Longitude"],
-                mode="markers",
-                showlegend=False,
-                textposition='top center',
-                marker = dict(color='#9ec044',
-                              size=40,
-                              symbol="harbor"
-                              ),
-                hovertext=popup_html,
-                hoverinfo='text',
-                text=df_map["Name"]
-                )
-
-
-
-            # fig.add_trace(go.Scattermapbox(
-            #     lat=[lat],
-            #     lon=[lon],
-            #     mode="markers",
-
-            #     marker=dict(
-            #             size=30,
-            #             color='red',
-            #             symbol="harbor",  # Alternativ "marker" oder "harbor"
-            #     ),
-            # # text=labels  # Text für die Marker
-            # ))
-
-        fig.update_layout(
-            mapbox_style="open-street-map",
-            mapbox_center={"lat": 54.3233, "lon": 10.1228},
-            mapbox_zoom=7,
-            margin={"r": 0, "t": 0, "l": 0, "b": 0},
+        # Karte mit Plotly erstellen
+        fig = px.scatter_map(
+            df_map,
+            lat="Latitude",
+            lon="Longitude",
+            hover_name="hover_name",
+            hover_data={"Latitude": False, "Longitude": False, "size": False},
+            color_discrete_sequence=[f"rgb{rgb_color}"],
+            size='size',
+            zoom=self.zoom,
             height=500
         )
+
+        # Layout der Karte anpassen
+        fig.update_layout(
+            mapbox_style="open-street-map",
+            mapbox_center={"lat": lat_mean, "lon": lon_mean},
+            margin={"r": 0, "t": 0, "l": 0, "b": 0}
+        )
+
         return fig
     
 
 
 
 
-        # fig = go.Figure(go.Scattermap(
-        # lat=df_map["Latitude"],
-        # lon=df_map["Longitude"],
-        # mode='markers',
-        # marker=go.scattermap.Marker(
-        #     size=30,
-            
-        #     color='rgb(255, 0, 0)',
-        #     symbol='marker'
-        #     #symbol='harbor'
-
-        # ),
-        # text=df_map["Name"],
-        #     ))
-
-        # fig.update_layout(
-        #     #autosize=True,
-        #     height=500,
-        #     hovermode='closest',
-        #     map=dict(
-        #         bearing=0,
-        #         center=dict(
-        #             lat=lat_mean,
-        #             lon=lon_mean
-        #         ),
-        #         pitch=0,
-        #         zoom=self.zoom
-        #     ),
-        # )
-
-        # return fig
 
 
     
@@ -305,4 +227,4 @@ if __name__ == '__main__':
     ]
 
     map = ShowMap(test_data)
-    map.plot().show()
+    map.plot()
