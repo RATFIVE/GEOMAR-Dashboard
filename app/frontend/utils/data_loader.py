@@ -33,8 +33,8 @@ def get_marina_data():
     RADIUS = 0.1
 
     for i, marina in enumerate(marinas):
-        if i == 1:
-            break
+        # if i == 1:
+        #     break
         marina_name = marina['name']
         marina_latitude = marina['location']['latitude']
         marina_longitude = marina['location']['longitude']
