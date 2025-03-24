@@ -24,8 +24,8 @@ class AdvancedCopernicus:
                    maximum_depth: float = 0.5016462206840515, 
                    coordinates_selection_method: str = "strict-inside", 
                    disable_progress_bar: bool = False, 
-                   username: str = 'mbanzhaf', 
-                   password: str = '6bF$ebvr',
+                   username: str = 'mbanzhaf1', 
+                   password: str = 'Copernicusmarine1',
                    output_filename: str = 'output.nc'
                    ):
         # Fetch subset data and save to output_filename
