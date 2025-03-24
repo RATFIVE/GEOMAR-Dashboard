@@ -4,9 +4,9 @@ from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 import pandas as pd
 import numpy as np
-from utils.Copernicus import AdvancedCopernicus
+from Copernicus import AdvancedCopernicus
 import json 
-from utils.OpenMeteoWeather import OpenMeteoWeather
+from OpenMeteoWeather import OpenMeteoWeather
 import datetime
 
 
@@ -27,7 +27,7 @@ def get_marina_data():
     END_DATETIME = datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
 
     # Start Date 1 year ago
-    START_DATETIME = datetime.datetime.now() - datetime.timedelta(days=356)
+    START_DATETIME = datetime.datetime.now() - datetime.timedelta(days=1)
     START_DATETIME = START_DATETIME.strftime("%Y-%m-%dT%H:%M:%SZ")
 
     RADIUS = 0.1
@@ -110,8 +110,8 @@ def get_marina_data():
     return marinas
 
 
-
-
+marinas = get_marina_data()
+print(marinas)
 
 # app = FastAPI()
 
