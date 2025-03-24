@@ -6,7 +6,7 @@ from streamlit_folium import st_folium
 import folium
 import requests
 from utils.Visualisations import ShowMap, LinePlot, Windrose
-from utils.data_loader import get_marina_data
+from utils.data_loader_v02 import get_marina_data
 import hashlib
 import subprocess
 import json
