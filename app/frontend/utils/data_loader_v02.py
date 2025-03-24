@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from utils.OpenMeteoWeather import OpenMeteoWeather
 from utils.OpenMeteoMarine import OpenMeteoMarine
+from utils.FrostServer import FrostServer
 import datetime
 import json
 
@@ -62,13 +63,62 @@ def get_marina_data():
 
 
         if marina['name'] == 'Badesteg Reventlou':
-            pass
 
-        print(f'\n')
-        #print(marina)
-        print(f"Marina: {marina_name}")
-        print(f"Latitude: {marina_latitude}")
-        print(f"Longitude: {marina_longitude}")
+            print(f"Processing Marina: {marina_name}")
+
+            server = FrostServer(thing='Things(3)')
+            observation_url = server.get_observations_url()
+            content = server.get_content(observation_url)
+            all_observations = server.get_all_observations()
+
+            df_obs = pd.DataFrame(all_observations)
+            df_obs["phenomenonTime"] = pd.to_datetime(df_obs["phenomenonTime"])
+            df_obs["resultTime"] = pd.to_datetime(df_obs["resultTime"])
+
+            # convert result to float
+            df_obs["result"] = df_obs["result"].astype(float)
+
+            # Get the last 365 days of observations
+            df_obs = df_obs[df_obs["phenomenonTime"] > pd.Timestamp.now(tz="UTC") - pd.DateOffset(days=365)]
+
+            df_obs.rename(columns={"phenomenonTime": "time", "result": "water_temperatur"}, inplace=True)
+            df_obs = df_obs[["time", "water_temperatur"]]
+            df_obs['time'] = df_obs['time'].dt.tz_localize(None)
+            df_obs.sort_values("time", inplace=True, ascending=False)
+            df_obs.reset_index(drop=True, inplace=True)
+
+
+
+            df_marine = client_marine.fetch_marine_data(latitude=marina_latitude, longitude=marina_longitude, start_date=START_DATE, end_date=END_DATE)
+
+            df_weaher = OpenMeteoWeather(latitude=marina_latitude, longitude=marina_longitude, start_date=START_DATE, end_date=END_DATE).get_weather_dataframe()
+            cols = ['time', 'wind_speed_10m', 'wind_direction_10m', 'temperature_2m', 'pressure_msl', 'relative_humidity_2m']
+            df_weaher = df_weaher[cols]
+        
+
+            # Merge the two dataframes
+            df = pd.merge(df_marine, df_weaher, on='time', how='inner')
+            df = process_data(df)
+
+            # Insert the observation data from OpenMeteo
+            insert_measurement(df, marina, key='sea_level_height_msl', name='water_height')
+            insert_measurement(df, marina, key='wind_speed_10m', name='wind_speed')
+            insert_measurement(df, marina, key='wind_direction_10m', name='wind_direction')
+            insert_measurement(df, marina, key='temperature_2m', name='air_temperature')
+            insert_measurement(df, marina, key='pressure_msl', name='air_pressure')
+            insert_measurement(df, marina, key='relative_humidity_2m', name='air_humidity')
+
+            # Insert the observation data from Frost Server
+            insert_measurement(df_obs, marina, key='water_temperatur', name='water_temperature')
+
+            #print(marina['measurement']['water_temperature'])
+
+
+
+
+
+            
+
 
         df_marine = client_marine.fetch_marine_data(latitude=marina_latitude, longitude=marina_longitude, start_date=START_DATE, end_date=END_DATE)
 
@@ -81,10 +131,6 @@ def get_marina_data():
         df = pd.merge(df_marine, df_weaher, on='time', how='inner')
         df = process_data(df)
 
-
-        # print(df)
-        # print(f'\n')
-        # print(df.info())
 
         insert_measurement(df, marina, key='sea_surface_temperature', name='water_temperature')
         insert_measurement(df, marina, key='sea_level_height_msl', name='water_height')
