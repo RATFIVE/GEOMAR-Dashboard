@@ -7,6 +7,10 @@ import numpy as np
 # import plotly.express as px
 # import plotly.graph_objects as go
 
+pd.set_option("display.max_columns", None)  # Zeigt alle Spalten an
+pd.set_option("display.max_rows", None)     # Optional: Zeigt alle Zeilen an
+pd.set_option("display.width", None)        # Passt die Breite dynamisch an
+pd.set_option("display.expand_frame_repr", False)  # Verhindert Zeilenumbrüche bei breiten DataFrames
 
 
 class FrostServer:
@@ -160,4 +164,14 @@ if __name__ == '__main__':
     # convert result to float
     df_obs["result"] = df_obs["result"].astype(float)
 
+    # Get the last 365 days of observations
+    df_obs = df_obs[df_obs["phenomenonTime"] > pd.Timestamp.now(tz="UTC") - pd.DateOffset(days=365)]
+
+    df_obs.rename(columns={"phenomenonTime": "time", "result": "water_temperatur"}, inplace=True)
+    df_obs = df_obs[["time", "water_temperatur"]]
+    df_obs['time'] = df_obs['time'].dt.tz_localize(None)
+    df_obs.sort_values("time", inplace=True, ascending=False)
+    df_obs.reset_index(drop=True, inplace=True)
+
     print(df_obs.head(3))
+    print(df_obs.info())
