@@ -154,6 +154,11 @@ class LinePlot:
                         args=["xaxis.range", [self.x.max() - pd.Timedelta(days=7), self.x.max()]]
                     ),
                     dict(
+                        label="Letzter Monat",
+                        method="relayout",
+                        args=["xaxis.range", [self.x.max() - pd.Timedelta(days=31), self.x.max()]]
+                    ),
+                    dict(
                         label="Letztes Jahr",
                         method="relayout",
                         args=["xaxis.range", [self.x.max() - pd.Timedelta(days=365), self.x.max()]]
