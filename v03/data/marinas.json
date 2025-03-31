@@ -1,0 +1,55 @@
+[
+    {
+        "name": "Sonwik Yachthafen Flensburg",
+        "location": {
+            "latitude": 54.793,
+            "longitude": 9.441
+        },
+        "address": {
+            "street": "Fördepromenade 2",
+            "zip": "24944",
+            "city": "Flensburg",
+            "country": "Germany"
+        }
+    },
+    {
+        "name": "Boltenhagen Marina",
+        "location": {
+            "latitude": 53.997,
+            "longitude": 11.216
+        },
+        "address": {
+            "street": "Am Yachthafen 1",
+            "zip": "23946",
+            "city": "Boltenhagen",
+            "country": "Germany"
+        }
+    },
+    {
+        "name": "Badesteg Reventlou",
+        "location": {
+            "latitude": 54.3323,
+            "longitude": 10.1519
+        },
+        "address": {
+            "street": "Reventloubrücke",
+            "zip": "24103",
+            "city": "Kiel",
+            "country": "Germany"
+        }
+    },
+    {
+        "name": "Kappeln",
+        "location": {
+            "latitude": 54.655,
+            "longitude": 9.934
+        },
+        "address": {
+            "street": "Hafenstraße 1",
+            "zip": "24376",
+            "city": "Kappeln",
+            "country": "Germany"
+        }
+    }
+    
+]

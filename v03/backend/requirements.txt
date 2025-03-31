@@ -1,0 +1,9 @@
+fastapi[standard]
+uvicorn
+pandas
+numpy
+xarray
+copernicusmarine
+openmeteo-requests
+requests-cache 
+retry-requests
