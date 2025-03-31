@@ -8,7 +8,7 @@ import datetime
 # import plotly.graph_objects as go
 
 pd.set_option("display.max_columns", None)  # Zeigt alle Spalten an
-pd.set_option("display.max_rows", None)  # Optional: Zeigt alle Zeilen an
+#pd.set_option("display.max_rows", None)  # Optional: Zeigt alle Zeilen an
 pd.set_option("display.width", None)  # Passt die Breite dynamisch an
 pd.set_option(
     "display.expand_frame_repr", False
@@ -55,7 +55,7 @@ class FrostServer:
     def print_content(self, content):
         return print(json.dumps(content, indent=4, ensure_ascii=False))
 
-    def get_all_observations(self, limit_per_page=1000):
+    def get_all_observations(self, limit_per_page=10000):
         observation_url = self.get_observations_url()
 
         # Zeitfilter: Letztes Jahr
@@ -107,9 +107,11 @@ if __name__ == "__main__":
     server = FrostServer(thing="Things(3)")
     observation_url = server.get_observations_url()
     content = server.get_content(observation_url)
-    df_obs = server.get_all_observations()
+    df_obs = server.get_all_observations(limit_per_page=10000)
 
     
 
     print(df_obs.head(3))
+    print(df_obs.tail(3))
+    print(df_obs.describe())
     print(df_obs.info())

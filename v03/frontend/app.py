@@ -1,7 +1,7 @@
 import pandas as pd
 import streamlit as st
 from utils.Visualisations import ShowMap, LinePlot, Windrose
-from utils.data_loader_v02 import get_marina_data
+from utils.data_loader import get_marina_data
 import json
 import plotly.graph_objects as go
 
@@ -54,7 +54,7 @@ class StreamlitApp:
 
             marinas = json.dumps(marinas, default=convert_timestamps, indent=4)
             marinas = json.loads(marinas)
-            print(marinas)
+            #print(marinas)
             return marinas
             # return None
             # return requests.get(API_URL).json()
@@ -90,7 +90,8 @@ class StreamlitApp:
             self.section1()
         st.divider()
         with st.expander("Daten", expanded=True):
-            self.section2()
+            with st.sidebar:
+                self.section2()
         st.divider()
         with st.expander("Visualisierung", expanded=True):
             self.section3()
@@ -101,12 +102,12 @@ class StreamlitApp:
             st.session_state["selected_marinas"] = [
                 marina["name"] for marina in st.session_state["preloaded_data"]
             ]
-
-        selected_marina = st.selectbox(
-            "Wähle den Hafen aus:", st.session_state["selected_marinas"]
-        )
+        with st.sidebar:
+            selected_marina = st.selectbox(
+                "Wähle den Hafen aus:", st.session_state["selected_marinas"]
+            )
         st.session_state["selected_marina"] = selected_marina
-        print(st.session_state["preloaded_data"])
+        #print(st.session_state["preloaded_data"])
         if "map" not in st.session_state:
             showmap = ShowMap(
                 data=st.session_state["preloaded_data"], zoom=7, control_scale=True
@@ -173,10 +174,10 @@ class StreamlitApp:
 
         col1, col2, col3 = st.columns(3)
         with col2:
-            st.markdown(
-                f"<h3 style='text-align: center;'>{selected_marina}</h3>",
-                unsafe_allow_html=True,
-            )
+            # st.markdown(
+            #     f"<h3 style='text-align: center;'>{selected_marina}</h3>",
+            #     unsafe_allow_html=True,
+            # )
 
             if "windrose" not in st.session_state:
                 windrose = Windrose(data=None).plot()
