@@ -43,7 +43,7 @@ def insert_measurement(df:pd.DataFrame, data:dict, key:str, name:str):
 
 def get_marina_data():
 
-    marinas = get_json_data('app/data/marinas.json')
+    marinas = get_json_data('v02/data/marinas.json')
 
     OUTPUT_FILENAME = "output.nc"
 
