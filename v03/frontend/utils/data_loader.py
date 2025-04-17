@@ -93,6 +93,9 @@ def get_marina_data():
             df = pd.merge(df_marine, df_weaher, on="time", how="inner")
             df = process_data(df)
 
+            # Filter data to just until today
+            df = df.loc[df["time"] <= datetime.datetime.now()]
+
             print(df.describe())
 
             # Insert the observation data from OpenMeteo
@@ -142,6 +145,8 @@ def get_marina_data():
         # Merge the two dataframes
         df = pd.merge(df_marine, df_weaher, on="time", how="inner")
         df = process_data(df)
+        # Filter data to just until today
+        df = df.loc[df["time"] <= datetime.datetime.now()]
 
         insert_measurement(
             df, marina, key="sea_surface_temperature", name="water_temperature"
