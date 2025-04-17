@@ -18,7 +18,7 @@ class ShowMap:
         self.zoom = zoom
         self.control_scale = control_scale
 
-    def extract_temperature(self, marina: dict) -> float | None:
+    def extract_measurements(self, marina: dict, measurement_key:str) -> float | None:
         """
         Extrahiert die aktuellste verfügbare Wassertemperatur aus den Messwerten einer Marina.
 
@@ -26,7 +26,7 @@ class ShowMap:
         :return: Letzte bekannte Wassertemperatur oder None, falls keine verfügbar.
         """
         measurement = marina.get("measurement", {})
-        water_temp_data = measurement.get("water_temperature")
+        water_temp_data = measurement.get(measurement_key)
 
         if water_temp_data:
             df = pd.DataFrame.from_dict(water_temp_data)
@@ -48,15 +48,27 @@ class ShowMap:
             marina.get("location", {}).get("longitude") for marina in self.data
         ]
         names = [marina.get("name", "Unknown Marina") for marina in self.data]
-        temperatures = [self.extract_temperature(marina) for marina in self.data]
-
+        water_temperatures = [self.extract_measurements(marina, 'water_temperature') for marina in self.data]
+        # ['water_temperature', 'water_height', 'wind_speed', 'wind_direction', 'air_temperature', 'air_pressure', 'air_humidity']
+        water_height = [self.extract_measurements(marina, 'water_height') for marina in self.data]
+        wind_speed = [self.extract_measurements(marina, 'wind_speed') for marina in self.data]
+        wind_direction = [self.extract_measurements(marina, 'wind_direction') for marina in self.data]
+        air_temperature = [self.extract_measurements(marina, 'air_temperature') for marina in self.data]
+        air_pressure = [self.extract_measurements(marina, 'air_pressure') for marina in self.data]
+        air_humidity = [self.extract_measurements(marina, 'air_humidity') for marina in self.data]
         # DataFrame für die Karte erstellen
         df_map = pd.DataFrame(
             {
                 "Latitude": latitudes,
                 "Longitude": longitudes,
                 "Name": names,
-                "Temperature": temperatures,
+                "Water Temperature": water_temperatures,
+                "Water Height": water_height,
+                "Wind Speed": wind_speed,
+                "Wind Direction": wind_direction,
+                "Air Temperature": air_temperature,
+                "Air Pressure": air_pressure,
+                "Air Humidity": air_humidity,
             }
         ).dropna()
         
@@ -69,16 +81,20 @@ class ShowMap:
         lat_mean = df_map["Latitude"].mean()
         lon_mean = df_map["Longitude"].mean()
 
+
+
+
         # Individuelle Hover-Informationen erstellen
-        df_map["hover_name"] = df_map.apply(
-            lambda row: f"{row['Name']}<br>Temperatur: {row['Temperature']}°C", axis=1
-        )
+        df_map["hover_name"] = df_map.apply(lambda row: f"{row['Name']}<br><br>Water Temperature: {row['Water Temperature']}°C <br> Water Height: {row['Water Height']} m <br> Wind Speed: {row['Wind Speed']} m/s <br> Wind Direction: {row['Wind Direction']}° <br> Air Temperature: {row['Air Temperature']}°C <br> Air Pressure: {row['Air Pressure']} hPa <br> Air Humidity: {row['Air Humidity']}%",  # noqa
+                                            axis=1)
+        
+
 
         df_map["size"] = 20  # Einheitliche Punktgröße
 
         # Hex-Farbe in RGB umwandeln
-        hex_color = "#78d278"
-        rgb_color = tuple(int(hex_color[i : i + 2], 16) for i in (1, 3, 5))
+        # hex_color = "#78d278"
+        # rgb_color = tuple(int(hex_color[i : i + 2], 16) for i in (1, 3, 5))
 
         # Karte mit Plotly erstellen
         fig = px.scatter_map(
@@ -281,26 +297,26 @@ if __name__ == "__main__":
         },
     ]
 
-    # map = ShowMap(test_data)
-    # map.plot().show()
+    map = ShowMap(test_data)
+    map.plot().show()
 
     # Test von Line plot
 
     # Erstellen von Testdaten
     # Angenommen, die x-Achse ist ein Zeitraum von einem Jahr und y sind zufällige Werte.
-    date_range = pd.date_range(start="2023-03-21", end="2024-03-21", freq="h")
-    y_values = np.random.randn(len(date_range))  # Zufällige Daten für y-Werte
+    # date_range = pd.date_range(start="2023-03-21", end="2024-03-21", freq="h")
+    # y_values = np.random.randn(len(date_range))  # Zufällige Daten für y-Werte
 
-    # Die Testdaten für die LinePlot-Klasse
-    x_test = date_range
-    y_test = y_values
-    title_test = "Testdaten für LinePlot"
-    x_label_test = "Zeit"
-    y_label_test = "Wert"
+    # # Die Testdaten für die LinePlot-Klasse
+    # x_test = date_range
+    # y_test = y_values
+    # title_test = "Testdaten für LinePlot"
+    # x_label_test = "Zeit"
+    # y_label_test = "Wert"
 
-    # Rückgabe der Testdaten
-    # x_test, y_test, title_test, x_label_test, y_label_test
+    # # Rückgabe der Testdaten
+    # # x_test, y_test, title_test, x_label_test, y_label_test
 
-    line_plot = LinePlot(x_test, y_test, title_test, x_label_test, y_label_test)
-    fig = line_plot.plot()
-    fig.show()
+    # line_plot = LinePlot(x_test, y_test, title_test, x_label_test, y_label_test)
+    # fig = line_plot.plot()
+    # fig.show()

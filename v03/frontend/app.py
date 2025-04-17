@@ -295,16 +295,16 @@ if __name__ == "__main__":
     app.header()
     data = app.preload_data()
 
-    # json_data = json.dumps(data, default=convert_timestamps, indent=4)
-    # print(data[0]['measurement']['water_temperature'].keys())
-    # print(type(json_data))
+    json_data = json.dumps(data, default=convert_timestamps, indent=4)
+    print(data[0]['measurement'].keys())
+    print(type(json_data))
 
-    # df = pd.DataFrame(data[0]['measurement']['water_temperature'])
+    df = pd.DataFrame(data[0]['measurement']['water_temperature'])
     
-    # df['time'] = pd.to_datetime(df['time'])
-    # print(df.info())
-    # print(df.describe())
-    # # df = pd.DataFrame(data)
-    # print(df)
-    # print(df.info())
+    df['time'] = pd.to_datetime(df['time'])
+    print(df.info())
+    print(df.describe())
+    # df = pd.DataFrame(data)
+    print(df)
+    print(df.info())
 
