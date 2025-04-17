@@ -5,6 +5,8 @@ from utils.OpenMeteoMarine import OpenMeteoMarine
 from utils.FrostServer import FrostServer
 import datetime
 import json
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 client_marine = OpenMeteoMarine()
 
@@ -145,8 +147,17 @@ def get_marina_data():
         # Merge the two dataframes
         df = pd.merge(df_marine, df_weaher, on="time", how="inner")
         df = process_data(df)
+
+
+
+        berlin_time = datetime.now(ZoneInfo("Europe/Berlin"))
+        # format time "%Y-%m-%d %H:%M:%S"
+        berlin_time = berlin_time.strftime("%Y-%m-%d %H:%M:%S")
+        # contert to datetime
+        berlin_time = datetime.strptime(berlin_time, "%Y-%m-%d %H:%M:%S")
+
         # Filter data to just until today
-        df = df.loc[df["time"] <= datetime.datetime.now()]
+        df = df.loc[df["time"] <= berlin_time]
 
         insert_measurement(
             df, marina, key="sea_surface_temperature", name="water_temperature"
