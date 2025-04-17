@@ -49,6 +49,17 @@ class OpenMeteoMarine:
 
 # Beispielaufruf
 if __name__ == "__main__":
+    import time
+    from datetime import datetime
+    end_datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) # 
+    # Extrahiere nur das Datum
+    end_date = datetime.strptime(end_datetime.split(" ")[0], "%Y-%m-%d").date()
+    end_date_str = end_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+    end_date_str =end_date_str.split("T")[0]
     client = OpenMeteoMarine()
-    df = client.fetch_marine_data(latitude=54.3323, longitude=10.1519, start_date="2024-05-08", end_date="2025-03-31")
+    df = client.fetch_marine_data(latitude=54.3323, longitude=10.1519, start_date="2025-04-01", end_date=end_date_str)
     print(df)
+    print(df.info())
+    print(df.describe())
+    print(df.head())
+    print(df.tail())

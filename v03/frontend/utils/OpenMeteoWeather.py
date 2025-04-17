@@ -130,7 +130,7 @@ if __name__ == "__main__":
     import time
     from datetime import datetime
 
-    end_datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    end_datetime = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) # 
     # Extrahiere nur das Datum
     end_date = datetime.strptime(end_datetime.split(" ")[0], "%Y-%m-%d").date()
     end_date_str = end_date.strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -141,5 +141,8 @@ if __name__ == "__main__":
                                start_date="2025-02-01", 
                                end_date=end_date_str
                                )
+    print(f'End date: {end_date_str}')
     df = weather.get_weather_dataframe()
     print(df)
+    print(df.info())
+    print(df.describe())
