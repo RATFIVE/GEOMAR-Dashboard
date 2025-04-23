@@ -135,3 +135,9 @@ if __name__ == "__main__":
     print(df_obs.info())
     print("\nThing Name:")
     print(server.get_thing_name())
+
+
+    print('\n\n')
+    content = server.get_observations_url()
+    content = server.get_content(url=content)
+    print(server.print_content(content=content))
