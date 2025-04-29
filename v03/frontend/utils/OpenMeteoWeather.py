@@ -127,6 +127,7 @@ class OpenMeteoWeather:
 
 
 if __name__ == "__main__":
+
     import time
     from datetime import datetime
 
@@ -134,7 +135,7 @@ if __name__ == "__main__":
     # Extrahiere nur das Datum
     end_date = datetime.strptime(end_datetime.split(" ")[0], "%Y-%m-%d").date()
     end_date_str = end_date.strftime("%Y-%m-%dT%H:%M:%SZ")
-    end_date_str =end_date_str.split("T")[0]
+    end_date_str = end_date_str.split("T")[0]
     # Example usage:
     weather = OpenMeteoWeather(latitude=54.32, 
                                longitude=10.12, 
