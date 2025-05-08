@@ -25,4 +25,14 @@ class Things:
         """
         response = requests.get(url)
         content = response.text
+        
         return json.loads(content)
+    
+
+
+
+if __name__ == "__main__":
+    things = Things()
+    things_list = things.content
+    print(f'Number of things: {len(things_list["value"])}')
+    pprint(things_list['value'][6])
