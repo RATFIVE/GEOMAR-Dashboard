@@ -165,74 +165,8 @@ class FrostServer:
 
 
 
-
-
-class Locations:
-    def __init__(self):
-        self.url = "https://timeseries.geomar.de/soop/FROST-Server/v1.1/Locations"
-        self.content = self.get_content(self.url)
-
-    
-    def get_content(self, url:str):
-        """Fetches content from the specified URL.
-
-        Args:
-            url (str): The URL to fetch content from.
-
-        Returns:
-
-
-            dict: The parsed JSON content from the response.
-        """
-        response = requests.get(url)
-        content = response.text
-        return json.loads(content)
-    
-
-
-
-def remove_duplicate_locations(data: dict | None):
-    """Remove duplicate locations from the data."""
-
-    if data is None:
-        print("No data provided.")
-        return None
-
-    # Assert, dass `data` ein Dictionary ist
-    assert isinstance(data, dict), "Input data must be a dictionary"
-
-    # Assert, dass `value` eine Liste ist, falls vorhanden
-    assert "value" not in data or isinstance(data["value"], list), "`value` must be a list"
-
-    seen_coords = set()
-    unique_values = []
-
-    for entry in data.get("value", []):
-        # Assert, dass 'location' und 'coordinates' vorhanden sind
-        assert "location" in entry and "coordinates" in entry["location"], "Each entry must contain 'location' with 'coordinates'"
-
-        coords = tuple(entry["location"]["coordinates"])
-        if coords not in seen_coords:
-            seen_coords.add(coords)
-            unique_values.append(entry)
-
-    return {
-        key: val for key, val in data.items() if key != "value"
-    } | {"value": unique_values}
-
-
-
-
 if __name__ == "__main__":
 
-    ##########################################################
-    # Example usage of the Location class
-    ##########################################################
-    locations = Locations()
-    locations_all = locations.get_content(locations.url)
-    #locations_all = remove_duplicate_locations(locations_all)
-    
-    pprint(locations_all)
 
 
 
@@ -240,28 +174,28 @@ if __name__ == "__main__":
     # Example usage of the FrostServer class
     ##########################################################
 
-    # server = FrostServer(thing="Things(9)")
-    # df_obs = server.get_all_observations(last_n_days=365, col_name="water_temperatur")
+    server = FrostServer(thing="Things(9)")
+    df_obs = server.get_all_observations(last_n_days=365, col_name="water_temperatur")
 
-    # print("\nHead:")
-    # print(df_obs.head(3))
+    print("\nHead:")
+    print(df_obs.head(3))
 
-    # print("\nTail:")
-    # print(df_obs.tail(3))
+    print("\nTail:")
+    print(df_obs.tail(3))
 
-    # print("\nDescribe:")
-    # print(df_obs.describe())
-    # print("\nInfo:")
+    print("\nDescribe:")
+    print(df_obs.describe())
+    print("\nInfo:")
 
-    # print(df_obs.info())
-    # print("\nThing Name:")
+    print(df_obs.info())
+    print("\nThing Name:")
 
-    # print(server.get_thing_name())
-    # print("\nPrint the Position:")
-    # print(server.print_content(server.get_content(server.get_position_url())))
+    print(server.get_thing_name())
+    print("\nPrint the Position:")
+    print(server.print_content(server.get_content(server.get_position_url())))
 
 
-    # # print('\n\n')
-    # # content = server.get_observations_url()
-    # # content = server.get_content(url=content)
-    # # print(server.print_content(content=content))
+    # print('\n\n')
+    # content = server.get_observations_url()
+    # content = server.get_content(url=content)
+    # print(server.print_content(content=content))
