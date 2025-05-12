@@ -68,32 +68,49 @@ class FrostServerClient:
         return self.get_all_paginated("Datastreams")
 
 
-# # Beispiel-Nutzung:
-# if __name__ == "__main__":
-#     frost = FrostServerClient("https://timeseries.geomar.de/soop/FROST-Server/v1.1/")
-    
-#     things = frost.list_things()
-#     print(f"Anzahl Things: {len(things)}")
-    
-#     first_thing = things[6]
-#     print("Erstes Thing:", first_thing['name'])
 
-#     datastreams = frost.get_entities("Things({})/Datastreams".format(first_thing['@iot.id']))
-#     # print(f"Datastreams für '{first_thing['name']}': {[ds['name'] for ds in datastreams]}")
 
-#     pprint("Datastreams für '{}':".format(first_thing['name']))
-#     for ds in datastreams:
-#         print(f"  - {ds['name']} (ID: {ds['@iot.id']})")
+# Beispiel-Nutzung:
+if __name__ == "__main__":
+    frost = FrostServerClient("https://timeseries.geomar.de/soop/FROST-Server/v1.1/")
     
-#     # Beispiel: Beobachtungen für den ersten Datastream
-#     if datastreams:
-#         first_datastream = datastreams[0]
-#         observations = frost.get_observations_for_datastream(first_datastream['@iot.id'])
-#         print(f"Anzahl Beobachtungen für '{first_datastream['name']}': {len(observations)}")
-#         if observations:
-#             print("Letzte Beobachtung:", observations[0])
-#     else:
-#         print("Keine Datastreams gefunden.")
+    things = frost.list_things()
+    print(f"Anzahl Things: {len(things)}")
+
+    thing = things[6] # Select Specific Thing
+
+    print("\nThing Keys:", thing.keys())
+    print("\nThing Name:", thing['name'])
+    print("\nThing Description:", thing['description'])
+    print("\nThing ID:", thing['@iot.id'])
+
+    print("\nThing Properties:", thing['properties'])
+    print("\nThing Datastream Link:", thing['Datastreams@iot.navigationLink'])
+
+    datastream = frost.get_entities(entity_type=f'Things({thing["@iot.id"]})/Datastreams')
+    #print("\nDatastreams:", datastream)
+
+    pprint(len(datastream))
+
+
+
+
+    # datastreams = frost.get_entities("Things({})/Datastreams".format(thing['@iot.id']))
+    # # print(f"Datastreams für '{thing['name']}': {[ds['name'] for ds in datastreams]}")
+
+    # pprint("Datastreams für '{}':".format(thing['name']))
+    # for ds in datastreams:
+    #     print(f"  - {ds['name']} (ID: {ds['@iot.id']})")
+    
+    # # Beispiel: Beobachtungen für den ersten Datastream
+    # if datastreams:
+    #     first_datastream = datastreams[0]
+    #     observations = frost.get_observations_for_datastream(first_datastream['@iot.id'])
+    #     print(f"Anzahl Beobachtungen für '{first_datastream['name']}': {len(observations)}")
+    #     if observations:
+    #         print("Letzte Beobachtung:", observations[0])
+    # else:
+    #     print("Keine Datastreams gefunden.")
 
 
 
