@@ -2,7 +2,10 @@ import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-
+from pprint import pprint
+import folium
+from streamlit_folium import st_folium
+from folium import Popup, IFrame
 
 # -----------------------------------
 class ShowMap:
@@ -39,84 +42,37 @@ class ShowMap:
         return None
 
     def plot(self):
-        """
-        Erstellt eine interaktive Karte mit den Marinas und deren Wassertemperatur.
-        """
-        # Standort- und Temperaturdaten extrahieren
-        latitudes = [marina.get("location", {}).get("latitude") for marina in self.data]
-        longitudes = [
-            marina.get("location", {}).get("longitude") for marina in self.data
-        ]
-        names = [marina.get("name", "Unknown Marina") for marina in self.data]
-        water_temperatures = [self.extract_measurements(marina, 'water_temperature') for marina in self.data]
-        # ['water_temperature', 'water_height', 'wind_speed', 'wind_direction', 'air_temperature', 'air_pressure', 'air_humidity']
-        water_height = [self.extract_measurements(marina, 'water_height') for marina in self.data]
-        wind_speed = [self.extract_measurements(marina, 'wind_speed') for marina in self.data]
-        wind_direction = [self.extract_measurements(marina, 'wind_direction') for marina in self.data]
-        air_temperature = [self.extract_measurements(marina, 'air_temperature') for marina in self.data]
-        air_pressure = [self.extract_measurements(marina, 'air_pressure') for marina in self.data]
-        air_humidity = [self.extract_measurements(marina, 'air_humidity') for marina in self.data]
-        # DataFrame für die Karte erstellen
-        df_map = pd.DataFrame(
-            {
-                "Latitude": latitudes,
-                "Longitude": longitudes,
-                "Name": names,
-                "Water Temperature": water_temperatures,
-                "Water Height": water_height,
-                "Wind Speed": wind_speed,
-                "Wind Direction": wind_direction,
-                "Air Temperature": air_temperature,
-                "Air Pressure": air_pressure,
-                "Air Humidity": air_humidity,
-            }
-        ).dropna()
-        
-        # Falls keine Daten vorhanden sind, abbrechen
-        if df_map.empty:
-            print("Keine gültigen Daten für die Karte verfügbar.")
-            return
+        m = folium.Map(location=[54.3323, 10.1519], zoom_start=self.zoom)
 
-        # Mittelwerte für die Karten-Zentrierung berechnen
-        lat_mean = df_map["Latitude"].mean()
-        lon_mean = df_map["Longitude"].mean()
+        for marina in self.data:
+            loc = marina["locations"][0]["location"]["coordinates"]
+            lat, lon = loc[1], loc[0]
 
+            # Popup-HTML zusammenbauen
+            ds = marina.get("datastreams", [])
+            popup_html = "<br>".join(
+                f"{ds_item['name'].split('*')[0].strip().capitalize().replace('_', ' ')}: "
+                f"{ds_item['observations']['values'][-1]} "
+                f"{ds_item.get('unitOfMeasurement',{}).get('symbol','')}"
+                for ds_item in ds if ds_item.get("observations",{}).get("values")
+            )
 
+            # 1) Einfaches Popup mit max_width
+            popup = Popup(popup_html, max_width=400)
 
+            # Alternativ 2) IFrame, um auch Höhe zu steuern und HTML komplexer zu gestalten:
+            # iframe = IFrame(html=popup_html, width=300, height=150)
+            # popup = Popup(iframe, max_width=400)
 
-        # Individuelle Hover-Informationen erstellen
-        df_map["hover_name"] = df_map.apply(lambda row: f"{row['Name']}<br><br>Water Temperature: {row['Water Temperature']}°C <br> Water Height: {row['Water Height']} m <br> Wind Speed: {row['Wind Speed']} m/s <br> Wind Direction: {row['Wind Direction']}° <br> Air Temperature: {row['Air Temperature']}°C <br> Air Pressure: {row['Air Pressure']} hPa <br> Air Humidity: {row['Air Humidity']}%",  # noqa
-                                            axis=1)
-        
+            folium.Marker(
+                location=(lat, lon),
+                tooltip=marina["name"],
+                popup=popup,
+            ).add_to(m)
 
+        return m
 
-        df_map["size"] = 20  # Einheitliche Punktgröße
-
-        # Hex-Farbe in RGB umwandeln
-        # hex_color = "#78d278"
-        # rgb_color = tuple(int(hex_color[i : i + 2], 16) for i in (1, 3, 5))
-
-        # Karte mit Plotly erstellen
-        fig = px.scatter_map(
-            df_map,
-            lat="Latitude",
-            lon="Longitude",
-            hover_name="hover_name",
-            hover_data={"Latitude": False, "Longitude": False, "size": False},
-            color_discrete_sequence=["rgb(255, 102, 102)"],
-            size="size",
-            zoom=self.zoom,
-            height=500,
-        )
-
-        # Layout der Karte anpassen
-        fig.update_layout(
-            mapbox_style="open-street-map",
-            mapbox_center={"lat": lat_mean, "lon": lon_mean},
-            margin={"r": 0, "t": 0, "l": 0, "b": 0},
-        )
-
-        return fig
+      
 
 
 class LinePlot:
@@ -264,41 +220,40 @@ class Windrose:
 
 
 if __name__ == "__main__":
-    test_data = [
-        {
-            "name": "Marina Kiel",
-            "location": {"latitude": 54.321, "longitude": 10.134},
-            "measurement": {
-                "water_temperature": [
-                    {"time": "2025-03-19T12:00:00Z", "values": 6.3},
-                    {"time": "2025-03-18T12:00:00Z", "values": 6.1},
-                ]
-            },
-        },
-        {
-            "name": "Marina Lübeck",
-            "location": {"latitude": 53.869, "longitude": 10.687},
-            "measurement": {
-                "water_temperature": [
-                    {"time": "2025-03-19T12:00:00Z", "values": 5.8},
-                    {"time": "2025-03-18T12:00:00Z", "values": 5.5},
-                ]
-            },
-        },
-        {
-            "name": "Marina Flensburg",
-            "location": {"latitude": 54.793, "longitude": 9.433},
-            "measurement": {
-                "water_temperature": [
-                    {"time": "2025-03-19T12:00:00Z", "values": 4.9},
-                    {"time": "2025-03-18T12:00:00Z", "values": 4.7},
-                ]
-            },
-        },
-    ]
+    test_data = [{'@iot.id': 3,
+  'datastreams': [{'description': 'WTemp c7991906-983b-4bf3-849f-14a139ffe4f3',
+                   'id': 1,
+                   'name': 'WTemp* measured by sensor '
+                           '*c7991906-983b-4bf3-849f-14a139ffe4f3*',
+                   'observations': {'time': ['2025-05-13 10:36:59',
+                                             '2025-05-13 09:37:00',
+                                             '2025-05-13 08:37:04',
+                                             '2025-05-13 07:37:19',
+                                             '2025-05-13 06:37:09'],
+                                    'values': [14.62,
+                                               14.37,
+                                               14.18,
+                                               14.0,
+                                               13.87]}}],
+  'description': 'LoRaWan box for temperature at Kiel, Reventlou.',
+  'locations': [{'@iot.id': 1,
+                 '@iot.selfLink': 'https://timeseries.geomar.de/soop/FROST-Server/v1.1/Locations(1)',
+                 'HistoricalLocations@iot.navigationLink': 'https://timeseries.geomar.de/soop/FROST-Server/v1.1/Locations(1)/HistoricalLocations',
+                 'Things@iot.navigationLink': 'https://timeseries.geomar.de/soop/FROST-Server/v1.1/Locations(1)/Things',
+                 'description': 'Measuring point',
+                 'encodingType': 'application/geo+json',
+                 'location': {'coordinates': [10.1519, 54.3323],
+                              'type': 'Point'},
+                 'name': 'Position lat 54.3323, lon 10.1519'}],
+  'name': 'Badesteg Reventlou'},
+ ]
+
 
     map = ShowMap(test_data)
-    map.plot().show()
+    m = map.plot()
+    st_folium(m, width=500)
+    # Display folium map in browser
+    #m.save("map.html")
 
     # Test von Line plot
 
