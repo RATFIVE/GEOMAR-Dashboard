@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from utils.OpenMeteoWeather import OpenMeteoWeather
 from utils.OpenMeteoMarine import OpenMeteoMarine
-from utils.FrostServer import FrostServer
+#from v04.frontend.utils.FrostServer_old import FrostServer
 import datetime
 import json
 
