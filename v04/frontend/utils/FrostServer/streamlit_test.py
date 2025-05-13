@@ -5,52 +5,25 @@ import folium
 from streamlit_folium import st_folium
 import requests
 from urllib.parse import urljoin
-
+from v04.frontend.utils.FrostServer import FrostServerClient
 
 # Konstante
-OBSERVATION_LIMIT = 1000  # Kannst du anpassen
+OBSERVATION_LIMIT = 100  # Kannst du anpassen
 
 
-# Deine vorhandene Klasse
-class FrostServerClient:
-    def __init__(self, base_url: str):
-        if not base_url.endswith('/'):
-            base_url += '/'
-        self.base_url = base_url
 
-    def get_entities(self, entity_type: str, params: dict = None) -> list:
-        url = urljoin(self.base_url, entity_type)
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        data = response.json()
-        return data.get('value', [])
 
-    def get_all_paginated(self, entity_type: str, params: dict = None) -> list:
-        url = urljoin(self.base_url, entity_type)
-        results = []
-        while url:
-            response = requests.get(url, params=params)
-            response.raise_for_status()
-            data = response.json()
-            results.extend(data.get('value', []))
-            url = data.get('@iot.nextLink', None)
-            params = None
-        return results
+def main():
 
-    def get_observations_for_datastream(self, datastream_id: int, top: int = 100) -> list:
-        entity = f"Datastreams({datastream_id})/Observations"
-        params = {"$top": top, "$orderby": "phenomenonTime desc"}
-        return self.get_entities(entity, params=params)
+    frost = FrostServerClient("https://timeseries.geomar.de/soop/FROST-Server/v1.1/")
+    things = frost.list_things()
+    print(f"Anzahl Things: {len(things)}")
 
-    def list_things_with_locations(self) -> list:
-        return self.get_all_paginated("Things?$expand=Locations")
-
-    def get_datastreams_for_thing(self, thing_id: int) -> list:
-        return self.get_entities(f"Things({thing_id})/Datastreams")
+    
 
 
 # Streamlit-App
-def main():
+def main_():
     st.set_page_config(layout="wide")
     st.title("🌐 FROST-Server Dashboard")
 
