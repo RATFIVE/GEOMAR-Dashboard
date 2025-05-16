@@ -52,7 +52,7 @@ class ShowMap:
             ds = marina.get("datastreams", [])
             popup_html = "<br>".join(
                 f"{ds_item['name'].split('*')[0].strip().capitalize().replace('_', ' ')}: "
-                f"{ds_item['observations']['values'][-1]} "
+                f"{ds_item['observations']['values'][0]} "
                 f"{ds_item.get('unitOfMeasurement',{}).get('symbol','')}"
                 for ds_item in ds if ds_item.get("observations",{}).get("values")
             )
