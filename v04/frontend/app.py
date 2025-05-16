@@ -11,6 +11,12 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import folium
+import streamlit as st
+from streamlit_javascript import st_javascript
+from streamlit_folium import st_folium
+
+
+
 print("\nStarting Streamlit App...\n")
 
 
@@ -268,10 +274,19 @@ class StreamlitApp:
             st.session_state.folium_map = folio_map
 
         # 3) Map rendern und Klick-Data abholen
+        # 1) Bildschirmmaße per JS
+        
+        # Liefere sofort einen numerischen Wert – keine JS-Function-Referenz!
+        screen_width  = st_javascript(js_code="window.innerWidth",  key="screen_w")
+        screen_height = st_javascript(js_code="window.innerHeight", key="screen_h")
+
+        # Beim allerersten Laden kann None zurückkommen, also sicherheitshalber default-Werte nehmen:
+        w = screen_width  or 800
+        h = screen_height or 600
         map_data = st_folium(
             st.session_state.folium_map,
-            width=1500,
-            height=500
+            width = w  - 40,              # z.B. 40px Rand
+            height= int(h * 0.9)         # 90% der Fensterhöhe
         )
 
         # 4) Erstes nicht-None-Event finden
