@@ -127,3 +127,4 @@ zarr==2.18.4
 plotly
 fastapi[standard]
 uvicorn
+streamlit-javascript>=0.1.5
