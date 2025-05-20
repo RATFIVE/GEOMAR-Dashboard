@@ -114,7 +114,7 @@ class StreamlitApp:
                         if 'latitude' in datastream['name'].lower():
 
                             # Get Observations for the datastream
-                            observations = frost.get_observations_for_datastream(datastream['@iot.id'])
+                            observations = frost.get_observations_for_datastream(datastream['@iot.id'], top=1000)
 
                             if observations:
                                 # get the first observation
