@@ -118,6 +118,16 @@ class StreamlitApp:
 
                             if observations:
                                 # get the first observation
+                                # get unique values
+                                unique_observations = {obs['result'] for obs in observations}
+                                all_obs = [obs['result'] for obs in observations]
+                                # convert all_obs to set
+                                unique_observations = set(all_obs)
+                                print(f'\nall_obs: {len(all_obs)}')
+                                print(f'\nunique_obs: {unique_observations}')
+
+                                # convert to list
+                                unique_observations = list(unique_observations)
                                 first_observation = observations[0]
                                 
                                 lat = first_observation['result']
@@ -129,6 +139,16 @@ class StreamlitApp:
 
                             if observations:
                                 # get the first observation
+                                # get unique values
+                                unique_observations = {obs['result'] for obs in observations}
+                                all_obs = [obs['result'] for obs in observations]
+                                # convert all_obs to set
+                                unique_observations = set(all_obs)
+                                print(f'\nall_obs: {len(all_obs)}')
+                                print(f'\nunique_obs: {unique_observations}')
+
+                                # convert to list
+                                unique_observations = list(unique_observations)
                                 first_observation = observations[0]
                                 
                                 lon = first_observation['result']
