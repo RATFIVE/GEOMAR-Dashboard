@@ -3,7 +3,7 @@ name: Keep Streamlit App Awake
 on:
   workflow_dispatch:    # erlaubt “Run workflow” manuell in der UI
   schedule:
-    - cron: '*/20 * * * *'  # alle 15 Minuten
+    - cron: '*/20 * * * *'  # alle 20 Minuten
 jobs:
   ping:
     runs-on: ubuntu-latest
