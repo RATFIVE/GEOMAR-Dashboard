@@ -9,4 +9,4 @@ jobs:
     steps:
       - name: Ping Streamlit App
         run: |
-          curl -m 10 -so /dev/null https://deine-app-name.streamlit.app/
+          curl -m 10 -so /dev/null https://geomar-dashboard-v04.streamlit.app/
