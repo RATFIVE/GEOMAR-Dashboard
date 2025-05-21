@@ -1,0 +1,12 @@
+# .github/workflows/keep_alive.yml
+name: Keep Streamlit App Awake
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # alle 15 Minuten
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Streamlit App
+        run: |
+          curl -m 10 -so /dev/null https://deine-app-name.streamlit.app/
