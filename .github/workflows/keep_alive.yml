@@ -1,6 +1,7 @@
 # .github/workflows/keep_alive.yml
 name: Keep Streamlit App Awake
 on:
+  workflow_dispatch:    # erlaubt “Run workflow” manuell in der UI
   schedule:
     - cron: '*/5 * * * *'  # alle 15 Minuten
 jobs:
