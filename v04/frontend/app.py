@@ -215,8 +215,8 @@ class StreamlitApp:
             }
 
             replace_names = {
-                "box_gmr_twl-box_0924002": "Kappeln",
-                "box_gmr_twl-box_0924005": "Flensburg",
+                "box_gmr_twl-box_0924002": "Marina Kappeln",
+                "box_gmr_twl-box_0924005": "Marina Flensburg",
             }
             # replace the name of the thing with the name in the replace_names dict
             for key, value in replace_names.items():
