@@ -179,7 +179,7 @@ class StreamlitApp:
                 
                 observations = df.rename(columns={'phenomenonTime': 'time', 'result': 'values'})
                 # convert 'time' to stringformat
-                observations['time'] = pd.to_datetime(observations['time']).dt.tz_localize(None)
+                observations['time'] = pd.to_datetime(observations['time'], errors="coerce", format="mixed").dt.tz_localize(None)
                 observations['time'] = observations['time'].dt.strftime('%Y-%m-%d %H:%M:%S')
                 observations = observations.to_dict(orient='list')
                 if observations:
