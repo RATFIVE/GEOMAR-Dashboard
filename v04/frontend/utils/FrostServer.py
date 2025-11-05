@@ -1,6 +1,7 @@
 import requests
 from urllib.parse import urljoin
 from pprint import pprint
+from typing import Optional, Dict, Any
 
 class FrostServerClient:
     def __init__(self, base_url: str):
@@ -11,7 +12,7 @@ class FrostServerClient:
             base_url += '/'
         self.base_url = base_url
 
-    def get_entities(self, entity_type: str, params: dict = None) -> list:
+    def get_entities(self, entity_type: str, params: Optional[Dict[str, Any]] = None) -> list:
         """
         entity_type: 'Things', 'Datastreams', 'Observations', 'Locations', etc.
         params: Optional: Dictionary mit OData-Parametern wie $filter, $expand, $top, etc.
@@ -22,11 +23,13 @@ class FrostServerClient:
         response.raise_for_status()
         data = response.json()
         return data.get('value', [])
-
-    def get_all_paginated(self, entity_type: str, params: dict = None) -> list:
+        
+    def get_all_paginated(self, entity_type: str, params: Optional[Dict[str, Any]] = None) -> list:
         """
         Holt alle Daten einer Entität, auch wenn sie über mehrere Seiten verteilt sind.
         """
+        if params is None:
+            params = {}  # Standardwert setzen, falls params None ist
         url = urljoin(self.base_url, entity_type)
         results = []
         while url:
@@ -37,6 +40,7 @@ class FrostServerClient:
             url = data.get('@iot.nextLink', None)
             params = None  # nur beim ersten Request nötig
         return results
+        
 
     def get_observations_for_datastream(self, datastream_id: int, top: int = 100) -> list:
         """
